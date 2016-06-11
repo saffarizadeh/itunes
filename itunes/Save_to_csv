@@ -1,0 +1,1 @@
+﻿COPY (SELECT * FROM app_app) TO '/home/kaminem64/1/myfile1.csv'  DELIMITER '@' CSV HEADER;
