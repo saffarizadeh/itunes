@@ -11,35 +11,19 @@ django.setup()
 
 from app.models import *
 
-
+import re
+import gc
 import gensim
-import random
-from sklearn.cross_validation import train_test_split
-import numpy as np
 import pickle
 from string import punctuation
-from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.metrics.pairwise import pairwise_distances
-from nltk.tokenize import sent_tokenize
 from sklearn.feature_extraction.text import TfidfVectorizer
 from nltk.corpus import stopwords
-import re
-import xlsxwriter
-from collections import OrderedDict
-import multiprocessing
-from collections import namedtuple
-from contextlib import contextmanager
-from timeit import default_timer
-import time
-from random import shuffle
-import datetime
 from nltk.stem.porter import PorterStemmer
 from nltk.stem import WordNetLemmatizer
-from gensim import matutils
-from gensim import models, similarities
-from gensim.similarities import MatrixSimilarity, SparseMatrixSimilarity, Similarity
-import gc
 from nltk.tokenize import TweetTokenizer
+from gensim import matutils
+from gensim import models
+from gensim.similarities import MatrixSimilarity, SparseMatrixSimilarity, Similarity
 
 stemmer = PorterStemmer()
 lemmatizer = WordNetLemmatizer()
@@ -74,24 +58,24 @@ class CleanDocuments(object):
 vectorizer = TfidfVectorizer(ngram_range=(1, 3), tokenizer=tokenize_stemmer, min_df=2, max_df=0.8, lowercase=True, strip_accents='ascii', stop_words='english')
 tfidf = vectorizer.fit_transform(CleanDocuments())
 print('Saving tfidf...')
-pickle.dump(tfidf, open('tfidf.p','wb'))
+pickle.dump(tfidf, open('exports/tfidf.p','wb'))
 print('tfidf saved!')
 
 corpus_gensim = matutils.Sparse2Corpus(tfidf.T)
 del(tfidf)
 print('Saving corpus_gensim...')
-pickle.dump(corpus_gensim, open('corpus_gensim.p','wb'))
+pickle.dump(corpus_gensim, open('exports/corpus_gensim.p','wb'))
 print('corpus_gensim saved!')
 
 vocab_gensim = {val: key for key, val in vectorizer.vocabulary_.items()} #gensim requires {id:word} dict not {word:id}
 print('Saving vocab_gensim...')
-pickle.dump(vocab_gensim, open('vocab_gensim.p','wb'))
+pickle.dump(vocab_gensim, open('exports/vocab_gensim.p','wb'))
 print('vocab_gensim saved!')
 
-# tfidf = pickle.load( open( "tfidf.p", "rb" ) )
-# corpus_gensim = pickle.load( open( "corpus_gensim.p", "rb" ) )
+# tfidf = pickle.load( open( "exports/tfidf.p", "rb" ) )
+# corpus_gensim = pickle.load( open( "exports/corpus_gensim.p", "rb" ) )
 # gensim_tfidf = list(corpus_gensim)
-# vocab_gensim = pickle.load( open( "vocab_gensim.p", "rb" ) )
+# vocab_gensim = pickle.load( open( "exports/vocab_gensim.p", "rb" ) )
 gc.collect()
 #----------------------------------------
 
@@ -101,22 +85,22 @@ def run_model(name):
     if name == 'lsi':
         lsi = models.LsiModel(corpus_gensim, id2word=vocab_gensim, num_topics=num_topics)
         print('Saving lsi_model...')
-        lsi.save('lsi.model')
+        lsi.save('exports/lsi.model')
         print('lsi_model saved!')
         # lsi_matrix = gensim.matutils.corpus2dense(lsi[corpus_gensim], len(lsi.projection.s)).T / lsi.projection.s
         # print('Saving lsi_matrix...')
-        # pickle.dump(lsi_matrix, open('lsi_matrix.p','wb'))
+        # pickle.dump(lsi_matrix, open('exports/lsi_matrix.p','wb'))
         # print('lsi_matrix saved!')
 
     elif name == 'lda':
         # lda = models.LdaModel(corpus_gensim, id2word=vocab_gensim, num_topics=num_topics, passes=5)
         lda = models.ldamulticore.LdaMulticore(corpus_gensim, id2word=vocab_gensim, num_topics=num_topics, passes=5)#, alpha='auto') #auto needs non multicore LDA
         print('Saving lda_model...')
-        lda.save('lda.model')
+        lda.save('exports/lda.model')
         print('lda_model saved!')
         # lda_matrix = gensim.matutils.corpus2dense(lda[corpus_gensim], lda.num_topics)
         # print('Saving lda_matrix...')
-        # pickle.dump(lda_matrix, open('lda_matrix.p','wb'))
+        # pickle.dump(lda_matrix, open('exports/lda_matrix.p','wb'))
         # print('lda_matrix saved!')
     gc.collect()
 

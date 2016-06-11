@@ -2,7 +2,7 @@ __author__ = 'kambiz'
 
 from app_details import AppCrawler
 from review_downloader import ReviewCrawler
-from review_extracter import ReviewExtracter
+from review_extractor import ReviewExtractor
 from app.models import *
 import time
 import urllib2
@@ -65,7 +65,7 @@ NA_apps_file.close()
 #             app_reviews_crawler = ReviewCrawler(app_id=app.store_app_id, app_store=app_store)
 #             app_reviews_crawler.start_download()
 #
-#             app_reviews_extractor = ReviewExtracter(app_id=app.store_app_id)
+#             app_reviews_extractor = ReviewExtractor(app_id=app.store_app_id)
 #             """app_reviews_extractor.save_reviews() could be used to create separate tables for users and reviews"""
 #             app_reviews_extractor.flat_save_reviews()
 #         except urllib2.HTTPError, err:

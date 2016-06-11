@@ -135,6 +135,17 @@ class ReviewReleaseNoteFlat(models.Model):
     def __unicode__(self):
         return self.id
 
+class ReviewReleaseNoteSim(models.Model):
+    store_app_id = models.IntegerField()
+    releasenote = models.ForeignKey(ReviewReleaseNoteFlat)
+    review = models.ForeignKey(ReviewReleaseNoteFlat)
+    star_rating = models.IntegerField(default=0)
+    user_apple_id = models.IntegerField(default=0)
+    version = models.CharField(max_length=200, blank=True, null=True)
+    date = models.DateTimeField()
+    def __unicode__(self):
+        return self.id
+
 class ToCrawl(models.Model):
     store_app_id = models.BigIntegerField(default=0)
     name = models.CharField(max_length=200, default='-')

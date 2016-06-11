@@ -18,7 +18,7 @@ from lxml import etree
 from pymongo import MongoClient
 
 
-class ReviewExtracter(object):
+class ReviewExtractor(object):
     def __init__(self, app_id):
         self.app_id = app_id
         self.app = App.objects.get(store_app_id=app_id)
