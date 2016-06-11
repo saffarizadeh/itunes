@@ -46,13 +46,14 @@ lsi_reviews_vecs = np.delete(lsi_reviews_vecs,0,0)
 lsi_similarity_cosine = cosine_similarity(lsi_reviews_vecs, lsi_releasenotes_vecs)
 
 
-for releasenote in releasenotes:
-   for review in reviews:
+for j, releasenote in enumerate(releasenotes):
+   for i, review in enumerate(reviews):
        ReviewReleaseNoteSim.objects.create(store_app_id=store_app_id,
                                            releasenote=releasenote,
                                            review=review,
                                            star_rating=review.star_rating,
                                            user_apple_id=review.user_apple_id,
                                            version=releasenote.version,
-                                           date=review.date
+                                           date=review.date,
+                                           similarity=lsi_similarity_cosine[i][j]
                                            )

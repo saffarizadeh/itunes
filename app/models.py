@@ -137,12 +137,13 @@ class ReviewReleaseNoteFlat(models.Model):
 
 class ReviewReleaseNoteSim(models.Model):
     store_app_id = models.IntegerField()
-    releasenote = models.ForeignKey(ReviewReleaseNoteFlat)
-    review = models.ForeignKey(ReviewReleaseNoteFlat)
+    releasenote = models.ForeignKey(ReviewReleaseNoteFlat, related_name='releasenote')
+    review = models.ForeignKey(ReviewReleaseNoteFlat, related_name='review')
     star_rating = models.IntegerField(default=0)
     user_apple_id = models.IntegerField(default=0)
     version = models.CharField(max_length=200, blank=True, null=True)
     date = models.DateTimeField()
+    similarity = models.FloatField(default=0)
     def __unicode__(self):
         return self.id
 

@@ -44,8 +44,9 @@ for window in rrule(MONTHLY, dtstart=start_date, until=last_rn):
     rn_t_1 = ReviewReleaseNoteFlat.objects.filter(store_app_id=store_app_id, is_review=False, date__range=(window-relativedelta(months=1), window))
     rn_t_2 = ReviewReleaseNoteFlat.objects.filter(store_app_id=store_app_id, is_review=False, date__range=(window-relativedelta(months=2), window-relativedelta(months=1)))
 
-    forward_feedback = ReleaseNoteReviewSim.objects.filter(releasenote__in=[rn_t_1], date__range=(window-relativedelta(months=2), window-relativedelta(months=1)))
-    backward_engagement = ReleaseNoteReviewSim.objects.filter(releasenote__in=[rn_t_2], date__range=(window-relativedelta(months=1), window))
-    average_rating = rn_review_sim.aggregate(Avg('star_rating'))
+    forward_feedback = ReviewReleaseNoteSim.objects.filter(similarity__gt= 0.2,releasenote__in=rn_t_1, date__range=(window-relativedelta(months=2), window-relativedelta(months=1)))
+    backward_engagement = ReviewReleaseNoteSim.objects.filter(similarity__gt= 0.2 ,releasenote__in=rn_t_2, date__range=(window-relativedelta(months=1), window))
+    average_rating = forward_feedback.aggregate(avg=Avg('star_rating'))
     print(window)
-    print(rn_t_012.count())
+    print(forward_feedback.count())
+    print(average_rating)
