@@ -70,13 +70,12 @@ class CleanDocuments(object):
         for document in list(ReviewReleaseNoteFlat.objects.filter(store_app_id=353263352).order_by('id')): #id >= 3717281
             yield document.body
 
-
+# share stages for all models
 vectorizer = TfidfVectorizer(ngram_range=(1, 3), tokenizer=tokenize_stemmer, min_df=2, max_df=0.8, lowercase=True, strip_accents='ascii', stop_words='english')
 tfidf = vectorizer.fit_transform(CleanDocuments())
 print('Saving tfidf...')
 pickle.dump(tfidf, open('tfidf.p','wb'))
 print('tfidf saved!')
-
 
 corpus_gensim = matutils.Sparse2Corpus(tfidf.T)
 del(tfidf)
@@ -93,33 +92,36 @@ print('vocab_gensim saved!')
 # corpus_gensim = pickle.load( open( "corpus_gensim.p", "rb" ) )
 # gensim_tfidf = list(corpus_gensim)
 # vocab_gensim = pickle.load( open( "vocab_gensim.p", "rb" ) )
+gc.collect()
+#----------------------------------------
 
 num_topics = 100
 
-gc.collect()
-lsi = models.LsiModel(corpus_gensim, id2word=vocab_gensim, num_topics=num_topics)
-print('Saving lsi_model...')
-lsi.save('lsi.model')
-print('lsi_model saved!')
-# lsi_matrix = gensim.matutils.corpus2dense(lsi[corpus_gensim], len(lsi.projection.s)).T / lsi.projection.s
-# print('Saving lsi_matrix...')
-# pickle.dump(lsi_matrix, open('lsi_matrix.p','wb'))
-# print('lsi_matrix saved!')
+def run_model(name):
+    if name == 'lsi':
+        lsi = models.LsiModel(corpus_gensim, id2word=vocab_gensim, num_topics=num_topics)
+        print('Saving lsi_model...')
+        lsi.save('lsi.model')
+        print('lsi_model saved!')
+        # lsi_matrix = gensim.matutils.corpus2dense(lsi[corpus_gensim], len(lsi.projection.s)).T / lsi.projection.s
+        # print('Saving lsi_matrix...')
+        # pickle.dump(lsi_matrix, open('lsi_matrix.p','wb'))
+        # print('lsi_matrix saved!')
 
-gc.collect()
+    elif name == 'lda':
+        # lda = models.LdaModel(corpus_gensim, id2word=vocab_gensim, num_topics=num_topics, passes=5)
+        lda = models.ldamulticore.LdaMulticore(corpus_gensim, id2word=vocab_gensim, num_topics=num_topics, passes=5)#, alpha='auto') #auto needs non multicore LDA
+        print('Saving lda_model...')
+        lda.save('lda.model')
+        print('lda_model saved!')
+        # lda_matrix = gensim.matutils.corpus2dense(lda[corpus_gensim], lda.num_topics)
+        # print('Saving lda_matrix...')
+        # pickle.dump(lda_matrix, open('lda_matrix.p','wb'))
+        # print('lda_matrix saved!')
+    gc.collect()
 
-# lda = models.LdaModel(corpus_gensim, id2word=vocab_gensim, num_topics=num_topics, passes=5)
-lda = models.ldamulticore.LdaMulticore(corpus_gensim, id2word=vocab_gensim, num_topics=num_topics, passes=5)#, alpha='auto') #auto needs non multicore LDA
-print('Saving lda_model...')
-lda.save('lda.model')
-print('lda_model saved!')
-# lda_matrix = gensim.matutils.corpus2dense(lda[corpus_gensim], lda.num_topics)
-# print('Saving lda_matrix...')
-# pickle.dump(lda_matrix, open('lda_matrix.p','wb'))
-# print('lda_matrix saved!')
 
-
-
+run_model('lsi')
 """
     To avoid memory problem we should use built-in methods instead of using numpy arrays.
     for example: http://radimrehurek.com/topic_modeling_tutorial/3%20-%20Indexing%20and%20Retrieval.html
