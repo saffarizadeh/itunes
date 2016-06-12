@@ -21,13 +21,13 @@ def get_ranking(html_source, date, category):
     rank_type='free'
     app_names=[]
     store_app_ids=[]
-    ranks = range(1, len(html.xpath('//div[2]/table/tbody/tr/td[1]/div/div/span[1]/a'))+1 )
-    for app_name in html.xpath('//div[2]/table/tbody/tr/td[1]/div/div/span[1]/a'):
+    ranks = range(1, len(html.xpath('//table/tbody/tr/td[1]/div/div/span[1]/span/a'))+1 )
+    for app_name in html.xpath('//table/tbody/tr/td[1]/div/div/span[1]/span/a'):
         try:
             app_names.append(app_name.text[:150])
         except:
             app_names.append('NA')
-    for store_app_id in html.xpath('//div[2]/table/tbody/tr/td[1]/div/div/span[3]'):
+    for store_app_id in html.xpath('//table/tbody/tr/td[1]/div/div/span[3]'):
         try:
             store_app_ids.append(store_app_id.text)
         except:
@@ -43,13 +43,13 @@ def get_ranking(html_source, date, category):
     rank_type='paid'
     app_names=[]
     store_app_ids=[]
-    ranks = range(1, len(html.xpath('//div[2]/table/tbody/tr/td[2]/div/div/span[1]/a'))+1 )
-    for app_name in html.xpath('//div[2]/table/tbody/tr/td[2]/div/div/span[1]/a'):
+    ranks = range(1, len(html.xpath('//table/tbody/tr/td[2]/div/div/span[1]/span/a'))+1 )
+    for app_name in html.xpath('//table/tbody/tr/td[2]/div/div/span[1]/span/a'):
         try:
             app_names.append(app_name.text[:150])
         except:
             app_names.append('NA')
-    for store_app_id in html.xpath('//div[2]/table/tbody/tr/td[2]/div/div/span[3]'):
+    for store_app_id in html.xpath('//table/tbody/tr/td[2]/div/div/span[3]'):
         try:
             store_app_ids.append(store_app_id.text)
         except:
@@ -65,13 +65,13 @@ def get_ranking(html_source, date, category):
     rank_type='grossing'
     app_names=[]
     store_app_ids=[]
-    ranks = range(1, len(html.xpath('//div[2]/table/tbody/tr/td[3]/div/div/span[1]/a'))+1 )
-    for app_name in html.xpath('//div[2]/table/tbody/tr/td[3]/div/div/span[1]/a'):
+    ranks = range(1, len(html.xpath('//table/tbody/tr/td[3]/div/div/span[1]/span/a'))+1 )
+    for app_name in html.xpath('//table/tbody/tr/td[3]/div/div/span[1]/span/a'):
         try:
             app_names.append(app_name.text[:150])
         except:
             app_names.append('NA')
-    for store_app_id in html.xpath('//div[2]/table/tbody/tr/td[3]/div/div/span[3]'):
+    for store_app_id in html.xpath('//table/tbody/tr/td[3]/div/div/span[3]'):
         try:
             store_app_ids.append(store_app_id.text)
         except:
@@ -108,12 +108,11 @@ def get_ranking(html_source, date, category):
 from selenium import webdriver
 from time import sleep
 
-print 'Launching Firefox..'
-browser = webdriver.Firefox()
+print 'Launching Chromium..'
+# browser = webdriver.Firefox()
+browser = webdriver.Chrome('./chromedriver')
 print 'Entering to AppAnnie'
 browser.get('https://www.appannie.com/account/login/')
-print 'Waiting 5 seconds...'
-sleep(3)
 
 username = browser.find_element_by_id("email")
 password = browser.find_element_by_id("password")
@@ -125,20 +124,23 @@ categories = ['books','business','catalogs','education','entertainment','finance
               'games','health-and-fitness','lifestyle','newsstand', 'medical','music','navigation','news','photo-and-video',
               'productivity','reference','shopping','social-networking','sports','travel','utilities','weather']
 
+categories = ['shopping']
+
 dates = ['2014-01-01', '2014-02-01', '2014-03-01', '2014-04-01', '2014-05-01', '2014-06-01', '2014-07-01', '2014-08-01',
          '2014-09-01', '2014-10-01', '2014-11-01', '2014-12-01', '2015-01-01', '2015-02-01', '2015-03-01', '2015-04-01',
          '2015-05-01', '2015-06-01', '2015-07-01', '2015-08-01', '2015-09-01', '2015-10-01', '2015-11-01', '2015-12-01',
          '2016-01-01']
+dates = ['2015-12-01', '2016-01-01']
 
 for category in categories:
     for date in dates:
-        url = 'https://www.appannie.com/apps/ios/top/united-states/'+category+'/?device=iphone&date='+date
+        url = 'https://www.appannie.com/apps/ios/top-chart/united-states/'+category+'/?device=iphone&date='+date
         browser.get(url)
         try:
             browser.find_element_by_class_name("load-all").click()
         except:
             raw_input("Press Enter to continue...")
-            url = 'https://www.appannie.com/apps/ios/top/united-states/'+category+'/?device=iphone&date='+date
+            url = 'https://www.appannie.com/apps/ios/top-chart/united-states/'+category+'/?device=iphone&date='+date
             browser.get(url)
             browser.find_element_by_class_name("load-all").click()
         sleep(3)
