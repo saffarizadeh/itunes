@@ -1,0 +1,1 @@
+In this research project we extract mobile applications' information and their user reviews from iTunes and then using document similarity methods measure the contribution of users' feedback to app success.
