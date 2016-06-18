@@ -34,7 +34,7 @@ sudo pip install psycopg2
 -----------------------
 Python driver for MongoDB
 -----------------------
-sudo pip3 install pymongo
+sudo pip install pymongo
 
 -----------------------
 lxml
