@@ -143,6 +143,7 @@ class ReviewReleaseNoteSim(models.Model):
     user_apple_id = models.IntegerField(default=0)
     version = models.CharField(max_length=200, blank=True, null=True)
     date = models.DateTimeField()
+    word_count = models.IntegerField(default=0)
     similarity = models.FloatField(default=0)
     def __unicode__(self):
         return self.id

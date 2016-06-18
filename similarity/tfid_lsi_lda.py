@@ -49,18 +49,61 @@ def tokenize_lemmatizer(text):
     else:
         return []
 
+
+
+# """ clean release notes """
+# print('Removing Dupicates From Release Notes...')
+# for app_id in apps.keys():
+#     vectorizer = TfidfVectorizer(min_df=1)
+#     releasenotes = apps[app_id]['release_notes']
+#     rn_sents = []
+#     index={}
+#     for i, rn in enumerate(releasenotes):
+#         sents = sent_tokenize(rn.replace('\n','.'))
+#         index[i] = [j for j in range(len(rn_sents), len(rn_sents)+len(sents))]
+#         rn_sents.extend(sents)
+#     try:
+#         rn_vectors = vectorizer.fit_transform(rn_sents)
+#         rn_similarity = cosine_similarity(rn_vectors,rn_vectors)
+#         np.fill_diagonal(rn_similarity, 0)
+#         #~ rn_similarity = np.triu(rn_similarity)
+#         where = np.where(rn_similarity>0.8)
+#         similar_rn_reviews =list(set(where[0]))
+#
+#         new_rns = []
+#         for sent_index in index.values():
+#             rn = '. '.join([rn_sents[sent] for sent in sent_index if sent not in similar_rn_reviews])
+#             new_rns.append(rn)
+#         apps[app_id]['release_notes'] = new_rns
+#     except:
+#         pass
+#
+
+
+
+app_ids = ReviewReleaseNoteFlat.objects.all().order_by('store_app_id').values_list('store_app_id',flat=True).distinct()[:100]
+print(app_ids)
+tfidf_db_map = {}
 class CleanDocuments(object):
     def __iter__(self):
-        for document in list(ReviewReleaseNoteFlat.objects.filter(store_app_id=353263352).order_by('id')): #id >= 3717281
+        index = 0
+        for document in ReviewReleaseNoteFlat.objects.filter(store_app_id__in=app_ids).order_by('id'): #id >= 3717281   .filter(store_app_id=353263352)
+            tfidf_db_map.update({document.id:index})
+            index += 1
             yield document.body
 
 # share stages for all models
-vectorizer = TfidfVectorizer(ngram_range=(1, 3), tokenizer=tokenize_stemmer, min_df=2, max_df=0.8, lowercase=True, strip_accents='ascii', stop_words='english')
+vectorizer = TfidfVectorizer(ngram_range=(1, 3), tokenizer=tokenize_stemmer, min_df=10, max_df=0.05, binary=True, lowercase=True, strip_accents='ascii', stop_words='english')
 tfidf = vectorizer.fit_transform(CleanDocuments())
+print('Saving vectorizer...')
+pickle.dump(vectorizer, open('exports/vectorizer.p','wb'))
+print('vectorizer saved!')
 print('Saving tfidf...')
 pickle.dump(tfidf, open('exports/tfidf.p','wb'))
 print('tfidf saved!')
-
+print('Saving tfidf_db_map...')
+pickle.dump(tfidf_db_map, open('exports/tfidf_db_map.p','wb'))
+print('tfidf_db_map saved!')
 corpus_gensim = matutils.Sparse2Corpus(tfidf.T)
 del(tfidf)
 print('Saving corpus_gensim...')
@@ -79,7 +122,7 @@ print('vocab_gensim saved!')
 gc.collect()
 #----------------------------------------
 
-num_topics = 100
+num_topics = 300
 
 def run_model(name):
     if name == 'lsi':

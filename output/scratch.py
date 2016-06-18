@@ -15,7 +15,7 @@ from dateutil.rrule import rrule, MONTHLY
 from dateutil.relativedelta import relativedelta
 import datetime
 
-GLOBAL_FIRST_DATE = datetime.datetime(2014, 1, 1)
+GLOBAL_FIRST_DATE = datetime.datetime(2013, 1, 1)
 GLOBAL_LAST_DATE = datetime.datetime(2016, 1, 1)
 
 store_app_id=353263352
@@ -39,7 +39,7 @@ for window in rrule(MONTHLY, dtstart=start_date, until=last_rn):
     try:
         rank = AppAnnieRankings.objects.get(store_app_id=store_app_id, date=window).rank
     except:
-        rank = None
+        rank = None #come up with an algorithm to ....
     try:
         rank_t_1 = AppAnnieRankings.objects.get(store_app_id=store_app_id, date=window-relativedelta(months=1)).rank
     except:
@@ -55,15 +55,16 @@ for window in rrule(MONTHLY, dtstart=start_date, until=last_rn):
     for user in leadusers_feedback:
         print(user)
 
-    forward_feedback = ReviewReleaseNoteSim.objects.filter(similarity__gt= 0.2,releasenote__in=rn_t_1, date__range=(window-relativedelta(months=2), window-relativedelta(months=1)))
+    forward_feedback = ReviewReleaseNoteSim.objects.filter(similarity__gt= 0.2,releasenote__in=rn_t_1, date__range=(window-relativedelta(months=2), window-relativedelta(months=1))) #also add t-3
     # forward_feedback_valance = forward_feedback.aggregate(avg=Avg('star_rating'))
     forward_feedback_volume = forward_feedback.count()
-    backward_engagement = ReviewReleaseNoteSim.objects.filter(similarity__gt= 0.2 ,releasenote__in=rn_t_2, date__range=(window-relativedelta(months=1), window))
+    backward_engagement = ReviewReleaseNoteSim.objects.filter(similarity__gt= 0.2 ,releasenote__in=rn_t_2, date__range=(window-relativedelta(months=1), window)) # two periods
     backward_engagement_valence = backward_engagement.aggregate(avg=Avg('star_rating'))
-    backward_engagement_volume = backward_engagement.count()
+    backward_engagement_volume = backward_engagement.count() #two separate volumes pos and neg
 
     version_cum_volume = ReviewReleaseNoteFlat.objects.filter(store_app_id=store_app_id, is_review=True, date__range=(latest_releasenote_date, window)).count()
     # total_cum_volume = ReviewReleaseNoteFlat.objects.filter(store_app_id=store_app_id, is_review=True, date__lte= window).count()
+    #----- Control variables: volume up until each release
     print(window)
     print('rank:', rank)
     print('rank_t_1:', rank_t_1)
@@ -71,3 +72,4 @@ for window in rrule(MONTHLY, dtstart=start_date, until=last_rn):
     print(latest_releasenote_date)
     print(version_cum_volume)
     # print(total_cum_volume)
+    print('\n\n')

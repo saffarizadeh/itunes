@@ -111,7 +111,7 @@ from time import sleep
 print 'Launching Chromium..'
 # browser = webdriver.Firefox()
 browser = webdriver.Chrome('./chromedriver')
-print 'Entering to AppAnnie'
+print 'Entering AppAnnie'
 browser.get('https://www.appannie.com/account/login/')
 
 username = browser.find_element_by_id("email")
@@ -124,13 +124,15 @@ categories = ['books','business','catalogs','education','entertainment','finance
               'games','health-and-fitness','lifestyle','newsstand', 'medical','music','navigation','news','photo-and-video',
               'productivity','reference','shopping','social-networking','sports','travel','utilities','weather']
 
-categories = ['shopping']
+# categories = ['shopping']
 
+
+#------------ add 2013 (at least 4 more months
 dates = ['2014-01-01', '2014-02-01', '2014-03-01', '2014-04-01', '2014-05-01', '2014-06-01', '2014-07-01', '2014-08-01',
          '2014-09-01', '2014-10-01', '2014-11-01', '2014-12-01', '2015-01-01', '2015-02-01', '2015-03-01', '2015-04-01',
          '2015-05-01', '2015-06-01', '2015-07-01', '2015-08-01', '2015-09-01', '2015-10-01', '2015-11-01', '2015-12-01',
          '2016-01-01']
-dates = ['2015-12-01', '2016-01-01']
+# dates = ['2015-12-01', '2016-01-01']
 
 for category in categories:
     for date in dates:
@@ -139,10 +141,14 @@ for category in categories:
         try:
             browser.find_element_by_class_name("load-all").click()
         except:
-            raw_input("Press Enter to continue...")
-            url = 'https://www.appannie.com/apps/ios/top-chart/united-states/'+category+'/?device=iphone&date='+date
-            browser.get(url)
-            browser.find_element_by_class_name("load-all").click()
+            try:
+                re.search('''There is no ranking data available on this date, for the selected country and category.''', browser.page_source).group()
+                continue
+            except:
+                raw_input("Press Enter to continue...")
+                url = 'https://www.appannie.com/apps/ios/top-chart/united-states/'+category+'/?device=iphone&date='+date
+                browser.get(url)
+                browser.find_element_by_class_name("load-all").click()
         sleep(3)
         html_source = browser.page_source
         date = datetime.datetime.strptime(date, '%Y-%m-%d')
