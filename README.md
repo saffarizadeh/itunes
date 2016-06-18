@@ -96,7 +96,7 @@ sudo apt-get update
 sudo apt-get install oracle-java8-installer
 
 -----------------------
-stanford parser (2015-04-20, which is compatible with NLTK)
+Stanford Parser (2015-04-20, which is compatible with NLTK)
 -----------------------
 http://nlp.stanford.edu/software/stanford-parser-full-2015-04-20.zip
 
