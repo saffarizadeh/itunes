@@ -107,3 +107,21 @@ os.environ['CLASSPATH'] = '%s/stanford-postagger-full-2015-04-20/stanford-postag
 os.environ['STANFORD_MODELS'] = '%s/stanford-postagger-full-2015-04-20/models:%s/stanford-ner-2015-04-20/classifiers' %(path, path)
 
 -----------------------
+Setup Database
+-----------------------
+python manage.py makemigrations
+
+python manage.py migrate
+
+-----------------------
+Download App Details and Reviews
+-----------------------
+python app/run_crawler.py
+
+-----------------------
+Download App Rankings
+-----------------------
+python rankings/get_rankings.py
+
+
+
