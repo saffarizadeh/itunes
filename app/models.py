@@ -171,3 +171,46 @@ class AppAnnieRankings(models.Model):
     crawled_on = models.DateTimeField(auto_now_add=True)
     def __unicode__(self):
         return self.id
+
+class RankingsAnalytics(models.Model):
+    store_app_id = models.IntegerField(default=0)
+    category = models.CharField(max_length=200)
+    rank_type = models.CharField(max_length=20)
+    first_appearance = models.IntegerField(blank=True, null=True)
+    last_appearance = models.IntegerField(blank=True, null=True)
+    n_observations = models.IntegerField(blank=True, null=True)
+    n_gaps = models.IntegerField(blank=True, null=True)
+    mean_gap = models.FloatField(blank=True, null=True)
+    std_gap = models.FloatField(blank=True, null=True)
+    gaps = models.CharField(max_length=200)
+    mean_rank = models.FloatField(blank=True, null=True)
+    std_rank = models.FloatField(blank=True, null=True)
+    min_rank = models.IntegerField(blank=True, null=True)
+    max_rank = models.IntegerField(blank=True, null=True)
+    single_gaps = models.IntegerField(blank=True, null=True)
+    two_cons_gaps = models.IntegerField(blank=True, null=True)
+    three_cons_gaps = models.IntegerField(blank=True, null=True)
+    four_plus_cons_gaps = models.IntegerField(blank=True, null=True)
+
+    def __unicode__(self):
+        return self.id
+
+
+class PanelData(models.Model):
+    store_app_id = models.IntegerField(default=0)
+    category = models.CharField(max_length=200)
+    age = models.IntegerField(blank=True, null=True)
+    type = models.CharField(max_length=20)
+    rank = models.IntegerField(blank=True, null=True)
+    window = models.DateTimeField()
+    new_leadusers_cumu = models.IntegerField(blank=True, null=True)
+
+    rank_improvement = models.IntegerField(blank=True, null=True)
+    forward_feedback_volume = models.IntegerField(blank=True, null=True)
+    backward_engagement_pos = models.IntegerField(blank=True, null=True)
+    backward_engagement_neg = models.IntegerField(blank=True, null=True)
+
+    version_cumu_volume = models.IntegerField(blank=True, null=True)
+    total_cumu_volume = models.IntegerField(blank=True, null=True)
+    def __unicode__(self):
+        return self.id

@@ -36,7 +36,7 @@ for store_app_id in app_id_list:
             else:
                 NA_apps.append(store_app_id)
             # time.sleep(1)
-        except urllib2.HTTPError, err:
+        except urllib2.HTTPError as err:
             if err.code == 503:
                 print '503'
                 time.sleep(360)
