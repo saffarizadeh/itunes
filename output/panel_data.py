@@ -25,6 +25,7 @@ for store_app_id in app_ids:
     print(store_app_id)
     app = App.objects.get(store_app_id=store_app_id)
     category = app.category.name.lower()
+    """ very important: create a name mapping; because category names are different on AppStore and AppAnnie"""
     if app.price == 0:
         rank_type = 'free'
     else:

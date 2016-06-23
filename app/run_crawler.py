@@ -11,6 +11,8 @@ import gc
 
 # app_id_list = ToCrawl.objects.filter(is_crawled=False).values_list('store_app_id', flat=True).distinct()
 
+# app_id_list = RankingsAnalytics.objects.filter(n_observations__gte=20, single_gaps__lte=1, two_cons_gaps=0, three_cons_gaps=0, four_plus_cons_gaps=0).values_list('store_app_id', flat=True).distinct()
+
 crawled_apps = App.objects.all().values_list('store_app_id', flat=True).distinct()
 app_id_list = open('app_list_1.csv', 'r').read().split('\n')
 app_id_list = [int(app_id) for app_id in app_id_list if app_id]

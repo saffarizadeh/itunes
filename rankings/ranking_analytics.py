@@ -27,7 +27,7 @@ categories = AppAnnieRankings.objects.order_by('category').values_list('category
 start_date = datetime.datetime.strptime('2014-01-01', '%Y-%m-%d')
 end_date = datetime.datetime.strptime('2016-01-01', '%Y-%m-%d')
 for category in categories:
-    for rank_type in ['free', 'paid', 'grossing']:
+    for rank_type in ['free', 'paid']:#, 'grossing']:
         ranking_analytics = []
         apps = AppAnnieRankings.objects.filter(category=category, rank_type=rank_type).values_list('store_app_id', flat=True).distinct()
         number_of_apps = len(apps)
