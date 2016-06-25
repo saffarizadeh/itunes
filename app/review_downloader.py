@@ -29,9 +29,9 @@ class ReviewCrawler(object):
 
     def get_total_pages(self):
         page_number = 0
-        url = "https://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=%s&pageNumber=%d&sortOrdering=4&onlyLatestVersion=false&type=Purple+Software" % (self.app_id, page_number)
+        url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=%s&pageNumber=%d&sortOrdering=4&onlyLatestVersion=false&type=Purple+Software" % (self.app_id, page_number)
         req = urllib2.Request(url, headers={"X-Apple-Store-Front": self.front,"User-Agent": self.user_agent})
-        u = urllib2.urlopen(req)
+        u = urllib2.urlopen(req, timeout=5)
         page = u.read()
         # root = ET.fromstring(page)
         parser = etree.XMLParser(recover=True)
@@ -45,10 +45,10 @@ class ReviewCrawler(object):
         self.finish_page = self.total_pages
 
     def download_reviews(self):
-        for page_number in xrange(self.start_page,self.finish_page):
-            url = "https://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=%s&pageNumber=%d&sortOrdering=4&onlyLatestVersion=false&type=Purple+Software" % (self.app_id, page_number)
+        for page_number in range(self.start_page,self.finish_page):
+            url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=%s&pageNumber=%d&sortOrdering=4&onlyLatestVersion=false&type=Purple+Software" % (self.app_id, page_number)
             req = urllib2.Request(url, headers={"X-Apple-Store-Front": self.front,"User-Agent": self.user_agent})
-            u = urllib2.urlopen(req)
+            u = urllib2.urlopen(req, timeout=5)
             page = u.read()
             parser = etree.XMLParser(recover=True)
             page = etree.fromstring(page, parser=parser)

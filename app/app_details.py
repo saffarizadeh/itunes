@@ -85,10 +85,10 @@ class AppCrawler(object):
         return app
 
     def extract_release_notes(self, page):
-        print page
+        # print page
         text = re.search('"versionHistory":(.+)', page).group(1).replace('null','""').replace('true','""')
-        print "\n\n\n\n\n\n\n\n\n\n"
-        print text
+        # print "\n\n\n\n\n\n\n\n\n\n"
+        # print text
         text = text[text.find('[{'): text.find('}]')+2]
         releases = eval(text)
         release_notes=[]
