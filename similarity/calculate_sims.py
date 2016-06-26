@@ -40,8 +40,8 @@ def tokenize_stemmer(text):
     else:
         return []
 
-store_app_id = 353263352
-app_ids = ReviewReleaseNoteFlat.objects.all().order_by('store_app_id').values_list('store_app_id',flat=True).distinct()[:100]
+app_ids = ReviewReleaseNoteFlat.objects.all().order_by('store_app_id').values_list('store_app_id',flat=True).distinct()
+# app_ids = App.objects.filter(is_reviews_crawled=True).order_by('id').values_list('store_app_id',flat=True)
 
 num_topics = 300
 tfidf = pickle.load( open( "exports/tfidf.p", "rb" ) )
@@ -95,7 +95,7 @@ for app_id in app_ids:
     for j, releasenote in enumerate(releasenotes):
        for i, review in enumerate(reviews):
            reviewrelease_objs.append(
-                           ReviewReleaseNoteSim(store_app_id=store_app_id,
+                           ReviewReleaseNoteSim(store_app_id=app_id,
                                                 releasenote=releasenote,
                                                 review=review,
                                                 star_rating=review.star_rating,

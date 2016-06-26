@@ -81,8 +81,9 @@ def tokenize_lemmatizer(text):
 
 
 
-app_ids = ReviewReleaseNoteFlat.objects.all().order_by('store_app_id').values_list('store_app_id',flat=True).distinct()[:100]
-print(app_ids)
+# app_ids = ReviewReleaseNoteFlat.objects.all().order_by('store_app_id').values_list('store_app_id',flat=True).distinct()[:100]
+app_ids = App.objects.filter(is_reviews_crawled=True).order_by('id').values_list('store_app_id',flat=True)
+# print(app_ids)
 tfidf_db_map = {}
 class CleanDocuments(object):
     def __iter__(self):
@@ -93,7 +94,7 @@ class CleanDocuments(object):
             yield document.body
 
 # share stages for all models
-vectorizer = TfidfVectorizer(ngram_range=(1, 3), tokenizer=tokenize_stemmer, min_df=10, max_df=0.05, binary=True, lowercase=True, strip_accents='ascii', stop_words='english')
+vectorizer = TfidfVectorizer(ngram_range=(1, 3), tokenizer=tokenize_stemmer, min_df=5, max_df=0.1, binary=True, lowercase=True, strip_accents='ascii', stop_words='english')
 tfidf = vectorizer.fit_transform(CleanDocuments())
 print('Saving vectorizer...')
 pickle.dump(vectorizer, open('exports/vectorizer.p','wb'))

@@ -19,17 +19,59 @@ GLOBAL_FIRST_DATE = datetime.datetime(2013, 1, 1)
 GLOBAL_LAST_DATE = datetime.datetime(2016, 1, 1)
 
 # store_app_id=353263352
-app_ids = ReviewReleaseNoteFlat.objects.all().order_by('store_app_id').values_list('store_app_id',flat=True).distinct()[7:100]
+app_ids = App.objects.filter(is_reviews_crawled=True).order_by('id').values_list('store_app_id',flat=True)
 
 for store_app_id in app_ids:
     print(store_app_id)
     app = App.objects.get(store_app_id=store_app_id)
-    category = app.category.name.lower()
-    """ very important: create a name mapping; because category names are different on AppStore and AppAnnie"""
-    if app.price == 0:
-        rank_type = 'free'
-    else:
-        rank_type = 'paid'
+    try:
+        app_rankinganalytics = RankingsAnalytics.objects.get(store_app_id=store_app_id, rank_type__in=['free', 'paid'], n_observations__gte=20,
+                                                             single_gaps__lte=1, two_cons_gaps=0, three_cons_gaps=0,
+                                                             four_plus_cons_gaps=0)
+    except:
+        app_rankinganalytics = RankingsAnalytics.objects.get(store_app_id=store_app_id, rank_type='grossing', n_observations__gte=20,
+                                                             single_gaps__lte=1, two_cons_gaps=0, three_cons_gaps=0,
+                                                             four_plus_cons_gaps=0)
+    rank_type = app_rankinganalytics.rank_type
+    category = app_rankinganalytics.category
+    # category_map = {
+    # 'Book': 'books',
+    # 'Business': 'business',
+    # 'Catalogs': 'catalogs',
+    # 'Education': 'education',
+    # 'Entertainment': 'entertainment',
+    # 'Finance': 'finance',
+    # 'Food & Drink': 'food-and-drink',
+    # 'Games': 'games',
+    # 'Health & Fitness': 'health-and-fitness',
+    # 'Lifestyle': 'lifestyle',
+    # 'Medical': 'medical',
+    # 'Music': 'music',
+    # 'Navigation': 'navigation',
+    # 'News': 'news',
+    # 'Newsstand': 'newsstand',
+    # 'Photo & Video': 'photo-and-video',
+    # 'Productivity': 'productivity',
+    # 'Reference': 'reference',
+    # 'Shopping': 'shopping',
+    # 'Social Networking': 'social-networking',
+    # 'Sports': 'sports',
+    # 'Travel': 'travel',
+    # 'Utilities': 'utilities',
+    # 'Weather': 'weather'
+    # }
+    # category = category_map[category]
+
+    # free = AppAnnieRankings.objects.filter(store_app_id=store_app_id, category=category,rank_type='free').count()
+    # paid = AppAnnieRankings.objects.filter(store_app_id=store_app_id, category=category,rank_type='paid').count()
+    # grossing = AppAnnieRankings.objects.filter(store_app_id=store_app_id, category=category,rank_type='grossing').count()
+    # if free >= paid and free >= grossing:
+    #     rank_type = 'free'
+    # elif paid >= free and paid >= grossing:
+    #     rank_type = 'paid'
+    # else:
+    #     rank_type = 'grossing'
+
     releasenotes = ReviewReleaseNoteFlat.objects.filter(store_app_id=store_app_id, is_review=False).order_by('id')
 
     # create app-specific time windows
@@ -88,38 +130,34 @@ for store_app_id in app_ids:
                 rank = None
 
         latest_releasenote_date = ReviewReleaseNoteFlat.objects.filter(store_app_id=store_app_id, is_review=False, date__lte=window).latest('date').date
-        # rn_t = ReleaseNote.objects.filter(store_app_id=store_app_id, date__range(datetime.datetime(window.year, window.month-1), datetime.datetime(window.year, window.month)))
-        # rn_t_1 = ReleaseNote.objects.filter(store_app_id=store_app_id, date__range(datetime.datetime(window.year, window.month-2), datetime.datetime(window.year, window.month-1)))
-        # rn_t_2 = ReleaseNote.objects.filter(store_app_id=store_app_id, date__range(datetime.datetime(window.year, window.month-3), datetime.datetime(window.year, window.month-2)))
+
         rn_t = ReviewReleaseNoteFlat.objects.filter(store_app_id=store_app_id, is_review=False, date__range=(window-relativedelta(months=1), window))
         rn_t_1 = ReviewReleaseNoteFlat.objects.filter(store_app_id=store_app_id, is_review=False, date__range=(window-relativedelta(months=2), window-relativedelta(months=1)))
         rn_t_2 = ReviewReleaseNoteFlat.objects.filter(store_app_id=store_app_id, is_review=False, date__range=(window-relativedelta(months=3), window-relativedelta(months=2)))
 
-        forward_feedback_t = ReviewReleaseNoteSim.objects.filter(similarity__gt= 0.2,releasenote__in=rn_t, date__range=(window-relativedelta(months=3), window-relativedelta(months=1))).count()
-        forward_feedback_t_1 = ReviewReleaseNoteSim.objects.filter(similarity__gt= 0.2,releasenote__in=rn_t_1, date__range=(window-relativedelta(months=3), window-relativedelta(months=2))).count()
-        # in this way we will consider this period twice: once here and once in the window that t_1 is t
-        # forward_feedback_t_1 = ReviewReleaseNoteSim.objects.filter(similarity__gt= 0.2,releasenote__in=rn_t_1, date__range=(window-relativedelta(months=3), window-relativedelta(months=2)))
-        # forward_feedback_valance = forward_feedback.aggregate(avg=Avg('star_rating'))
+        forward_feedback_t = ReviewReleaseNoteSim.objects.filter(store_app_id=store_app_id, similarity__gt= 0.2,releasenote__in=rn_t, date__range=(window-relativedelta(months=3), window-relativedelta(months=1))).count()
+        forward_feedback_t_1 = ReviewReleaseNoteSim.objects.filter(store_app_id=store_app_id, similarity__gt= 0.2,releasenote__in=rn_t_1, date__range=(window-relativedelta(months=3), window-relativedelta(months=2))).count()
         forward_feedback_volume = forward_feedback_t + forward_feedback_t_1
+        # in this way we will consider this period twice: once here and once in the window that t_1 is t
 
         """ we can also consider word count """
-        backward_engagement_pos_t_2 = ReviewReleaseNoteSim.objects.filter(star_rating__gt=3, similarity__gt= 0.2 ,releasenote__in=rn_t_2, date__range=(window-relativedelta(months=2), window)).count()
-        backward_engagement_pos_t_1 = ReviewReleaseNoteSim.objects.filter(star_rating__gt=3, similarity__gt= 0.2 ,releasenote__in=rn_t_1, date__range=(window-relativedelta(months=1), window)).count()
-        backward_engagement_neg_t_2 = ReviewReleaseNoteSim.objects.filter(star_rating__lte=3, similarity__gt= 0.2 ,releasenote__in=rn_t_2, date__range=(window-relativedelta(months=2), window)).count()
-        backward_engagement_neg_t_1 = ReviewReleaseNoteSim.objects.filter(star_rating__lte=3, similarity__gt= 0.2 ,releasenote__in=rn_t_1, date__range=(window-relativedelta(months=1), window)).count()
-
-        # backward_engagement_valence = backward_engagement.aggregate(avg=Avg('star_rating'))
+        backward_engagement_pos_t_2 = ReviewReleaseNoteSim.objects.filter(store_app_id=store_app_id, star_rating__gt=3, similarity__gt= 0.2 ,releasenote__in=rn_t_2, date__range=(window-relativedelta(months=2), window)).count()
+        backward_engagement_pos_t_1 = ReviewReleaseNoteSim.objects.filter(store_app_id=store_app_id, star_rating__gt=3, similarity__gt= 0.2 ,releasenote__in=rn_t_1, date__range=(window-relativedelta(months=1), window)).count()
+        backward_engagement_neg_t_2 = ReviewReleaseNoteSim.objects.filter(store_app_id=store_app_id, star_rating__lte=3, similarity__gt= 0.2 ,releasenote__in=rn_t_2, date__range=(window-relativedelta(months=2), window)).count()
+        backward_engagement_neg_t_1 = ReviewReleaseNoteSim.objects.filter(store_app_id=store_app_id, star_rating__lte=3, similarity__gt= 0.2 ,releasenote__in=rn_t_1, date__range=(window-relativedelta(months=1), window)).count()
         backward_engagement_pos = backward_engagement_pos_t_2 + backward_engagement_pos_t_1
         backward_engagement_neg = backward_engagement_neg_t_2 + backward_engagement_neg_t_1
+
         period_new_leadusers = 0
+        allusers = ReviewReleaseNoteFlat.objects.filter(store_app_id=store_app_id, is_review=True,
+                                             date__range=(window - relativedelta(months=2), window)).order_by('user_apple_id').values_list('user_apple_id', flat=True).distinct()
         for leaduser in leadusers_dict.keys():
-            if ReviewReleaseNoteFlat.objects.filter(store_app_id=store_app_id, is_review=True, user_apple_id=leaduser, date__range=(window-relativedelta(months=2), window)).exists():
+            if leaduser in allusers:
                 leadusers_dict[leaduser] -= 1 #the first appearance doesn't count as being leaduser
             if leadusers_dict[leaduser] == 0:
                 period_new_leadusers += 1
                 del(leadusers_dict[leaduser])
         new_leadusers_cumu += period_new_leadusers
-
         version_cumu_volume = ReviewReleaseNoteFlat.objects.filter(store_app_id=store_app_id, is_review=True, date__range=(latest_releasenote_date, window)).count()
         total_cumu_volume = ReviewReleaseNoteFlat.objects.filter(store_app_id=store_app_id, is_review=True, date__lte= window).count()
         #----- Control variables: volume up until each release
@@ -129,23 +167,8 @@ for store_app_id in app_ids:
         except:
             rank_improvement = None
 
-
         age = window - app.first_release_date
 
-
-        # print(store_app_id)
-        # print(category)
-        # print(age.days)
-        # print(rank_type)
-        # print(new_leadusers_cumu)
-        # print(window)
-        # print(rank_improvement)
-        # print(forward_feedback_volume)
-        # print(backward_engagement_pos)
-        # print(backward_engagement_neg)
-        # print(version_cumu_volume)
-        # print(total_cumu_volume)
-        # print(rank, '\n-----------------------------')
         panel_data.append(
                             PanelData(store_app_id=store_app_id,
                                       category=category,
