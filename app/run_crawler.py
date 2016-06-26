@@ -91,3 +91,4 @@ for app in app_list:
     app.is_reviews_crawled = True
     app.save()
 
+
