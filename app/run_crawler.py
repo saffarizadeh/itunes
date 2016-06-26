@@ -7,6 +7,7 @@ from app.models import *
 import time
 import urllib2
 import socket
+import requests
 import gc
 
 
@@ -69,8 +70,8 @@ for app in app_list:
             app_reviews_extractor = ReviewExtractor(app_id=app.store_app_id)
             """app_reviews_extractor.save_reviews() could be used to create separate tables for users and reviews"""
             app_reviews_extractor.flat_save_reviews()
-        except urllib2.HTTPError as err:
-            if err.code == 503:
+        except requests.exceptions.HTTPError as err:
+            if err.response.status_code == 503:
                 print('503')
                 time.sleep(360)
                 continue
