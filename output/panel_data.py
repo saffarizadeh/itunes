@@ -25,13 +25,13 @@ for store_app_id in app_ids:
     print(store_app_id)
     app = App.objects.get(store_app_id=store_app_id)
     try:
-        app_rankinganalytics = RankingsAnalytics.objects.get(store_app_id=store_app_id, rank_type__in=['free', 'paid'], n_observations__gte=20,
+        app_rankinganalytics = RankingsAnalytics.objects.filter(store_app_id=store_app_id, rank_type__in=['free', 'paid'], n_observations__gte=20,
                                                              single_gaps__lte=1, two_cons_gaps=0, three_cons_gaps=0,
-                                                             four_plus_cons_gaps=0)
+                                                             four_plus_cons_gaps=0).order_by('-n_observations')[0]
     except:
-        app_rankinganalytics = RankingsAnalytics.objects.get(store_app_id=store_app_id, rank_type='grossing', n_observations__gte=20,
+        app_rankinganalytics = RankingsAnalytics.objects.filter(store_app_id=store_app_id, rank_type='grossing', n_observations__gte=20,
                                                              single_gaps__lte=1, two_cons_gaps=0, three_cons_gaps=0,
-                                                             four_plus_cons_gaps=0)
+                                                             four_plus_cons_gaps=0).order_by('-n_observations')[0]
     rank_type = app_rankinganalytics.rank_type
     category = app_rankinganalytics.category
     # category_map = {
