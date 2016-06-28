@@ -145,7 +145,7 @@ for category in categories:
                 continue
             except:
                 raw_input("Press Enter to continue...")
-                url = 'https://www.appannie.com/apps/ios/top-chart/united-states/'+category+'/?device=iphone&date='+date
+                # url = 'https://www.appannie.com/apps/ios/top-chart/united-states/'+category+'/?device=iphone&date='+date
                 browser.get(url)
                 browser.find_element_by_class_name("load-all").click()
         sleep(3)
