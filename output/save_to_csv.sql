@@ -1,0 +1,1 @@
+﻿COPY (SELECT * FROM app_paneldata) TO '/home/kaminem64/itunes/output/exports/table1.csv' with CSV HEADER;
