@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'itunes.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'itunes',
+        'NAME': 'itunes_lp',
         'USER': 'postgres',
         'PASSWORD': 'linux116',
         'HOST': 'localhost',

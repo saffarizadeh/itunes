@@ -5,7 +5,6 @@ from review_downloader import ReviewCrawler
 from review_extractor import ReviewExtractor
 from app.models import *
 import time
-import urllib2
 import socket
 import requests
 import gc
@@ -40,17 +39,21 @@ def get_app_details():
                 else:
                     NA_apps.append(store_app_id)
                 # time.sleep(1)
-            except urllib2.HTTPError as err:
-                if err.code == 503:
+            except requests.exceptions.HTTPError as err:
+                if err.response.status_code == 503:
                     print('503')
                     time.sleep(360)
                     continue
                 else:
-                    print(err)
+                    print(err, 'HTTP')
                     time.sleep(360)
                     continue
+            except socket.timeout as err:
+                print(err, 'Socket')
+                time.sleep(360)
+                continue
             except Exception as err:
-                print(err)
+                print(err, 'Other')
                 time.sleep(360)
                 continue
             break
