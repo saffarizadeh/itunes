@@ -1,27 +1,57 @@
 # -*- coding: utf-8 -*-
 import re
 from lxml import etree
-import urllib2
 import datetime
+import requests
+
 
 page_number = 0
-app_id = 284882215
+app_id = 828256236
 user_agent = 'iTunes/12.3.2  (Macintosh; Intel Mac OS X 10.5.8) AppleWebKit/533.16'
-store_id_d = 143441
+app_store = 'us'
 front = "143441"
 url = "https://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=%s&pageNumber=%d&sortOrdering=4&onlyLatestVersion=false&type=Purple+Software" % (app_id, page_number)
-req = urllib2.Request(url, headers={"X-Apple-Store-Front": front,"User-Agent": user_agent})
-u = urllib2.urlopen(req, timeout=30)
-page = u.read()
-# root = ET.fromstring(page)
-parser = etree.XMLParser(recover=True)
-root = etree.fromstring(page, parser=parser)
-for node in root.findall('{http://www.apple.com/itms/}View/{http://www.apple.com/itms/}ScrollView/{http://www.apple.com/itms/}VBoxView/{http://www.apple.com/itms/}View/{http://www.apple.com/itms/}MatrixView/{http://www.apple.com/itms/}VBoxView/{http://www.apple.com/itms/}VBoxView/{http://www.apple.com/itms/}HBoxView/{http://www.apple.com/itms/}TextView/{http://www.apple.com/itms/}SetFontStyle/{http://www.apple.com/itms/}b'):
-    try:
-        total_pages = re.search('Page 1 of (\d+)', node.text).group(1)
-    except:
-        total_pages = 1
-print total_pages
+headers={"X-Apple-Store-Front": front,"User-Agent": user_agent}
+# u = requests.get(url, timeout=30, verify=False, headers=headers)
+# page = u.content
+# parser = etree.XMLParser(recover=True)
+# root = etree.fromstring(page, parser=parser)
+# for node in root.findall('{http://www.apple.com/itms/}View/{http://www.apple.com/itms/}ScrollView/{http://www.apple.com/itms/}VBoxView/{http://www.apple.com/itms/}View/{http://www.apple.com/itms/}MatrixView/{http://www.apple.com/itms/}VBoxView/{http://www.apple.com/itms/}VBoxView/{http://www.apple.com/itms/}HBoxView/{http://www.apple.com/itms/}TextView/{http://www.apple.com/itms/}SetFontStyle/{http://www.apple.com/itms/}b'):
+#     try:
+#         total_pages = re.search('Page 1 of (\d+)', node.text).group(1)
+#     except:
+#         total_pages = 1
+# print total_pages
+
+
+
+def extract_release_notes(page):
+    # print page
+    text = re.search('"versionHistory":(.+)', page).group(1).replace('null', '""').replace('true', '""')
+    # print "\n\n\n\n\n\n\n\n\n\n"
+    # print text
+    # text = text[text.find('[{'): text.find('}]') + 2]
+    t1 = text[text.find('[{"releaseNotes"'): text.rfind('"releaseNotes"') - 2]
+    tm = text[text.rfind('"releaseNotes"') - 2:]
+    t2 = tm[tm.find('{"releaseNotes"'):tm.find('}')+1]
+    text = t1 + ',' + t2 + ']'
+    releases = eval(text)
+    release_notes = []
+    for release in releases:
+        release_date = datetime.datetime.strptime(release['releaseDate'], '%Y-%m-%dT%H:%M:%SZ')
+        # release_note = release['releaseNotes'].decode('raw_unicode_escape') #alleviate bullet point render problem
+        release_note = release['releaseNotes']
+        release_version = release['versionString']
+        release_notes.append({'version': release_version, 'date': release_date, 'note': release_note})
+    return release_notes
+
+
+
+app_url = "https://itunes.apple.com/%s/app/id%d?mt=8" %(app_store, app_id)
+u = requests.get(app_url, timeout=30, verify=False, headers={"User-Agent": user_agent})
+page = u.content
+print(extract_release_notes(page))
+
 
 # from lxml import etree
 #
