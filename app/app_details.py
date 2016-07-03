@@ -89,7 +89,17 @@ class AppCrawler(object):
         text = re.search('"versionHistory":(.+)', page).group(1).replace('null','""').replace('true','""')
         # print "\n\n\n\n\n\n\n\n\n\n"
         # print text
-        text = text[text.find('[{'): text.find('}]')+2]
+        # text = text[text.find('[{'): text.find('}]')+2]
+        try:
+            t1 = text[text.find('[{"releaseNotes"'): text.rfind('"releaseNotes"') - 2]
+            tm = text[text.rfind('"releaseNotes"') - 2:]
+            t2 = tm[tm.find('{"releaseNotes"'):tm.find('}') + 1]
+            text = t1 + ',' + t2 + ']'
+            releases = eval(text)
+        except:
+            t2 = text[text.find('{"releaseNotes"'):text.find('}') + 1]
+            text = '[' + t2 + ']'
+            releases = eval(text)
         releases = eval(text)
         release_notes=[]
         for release in releases:
