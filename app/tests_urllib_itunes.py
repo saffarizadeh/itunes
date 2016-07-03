@@ -6,7 +6,7 @@ import requests
 
 
 page_number = 0
-app_id = 828256236
+app_id = 828966363
 user_agent = 'iTunes/12.3.2  (Macintosh; Intel Mac OS X 10.5.8) AppleWebKit/533.16'
 app_store = 'us'
 front = "143441"
@@ -31,11 +31,16 @@ def extract_release_notes(page):
     # print "\n\n\n\n\n\n\n\n\n\n"
     # print text
     # text = text[text.find('[{'): text.find('}]') + 2]
-    t1 = text[text.find('[{"releaseNotes"'): text.rfind('"releaseNotes"') - 2]
-    tm = text[text.rfind('"releaseNotes"') - 2:]
-    t2 = tm[tm.find('{"releaseNotes"'):tm.find('}')+1]
-    text = t1 + ',' + t2 + ']'
-    releases = eval(text)
+    try:
+        t1 = text[text.find('[{"releaseNotes"'): text.rfind('"releaseNotes"') - 2]
+        tm = text[text.rfind('"releaseNotes"') - 2:]
+        t2 = tm[tm.find('{"releaseNotes"'):tm.find('}')+1]
+        text = t1 + ',' + t2 + ']'
+        releases = eval(text)
+    except:
+        t2 = text[text.find('{"releaseNotes"'):text.find('}') + 1]
+        text = '[' + t2 + ']'
+        releases = eval(text)
     release_notes = []
     for release in releases:
         release_date = datetime.datetime.strptime(release['releaseDate'], '%Y-%m-%dT%H:%M:%SZ')
