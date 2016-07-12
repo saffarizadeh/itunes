@@ -12,7 +12,7 @@ import gc
 
 # app_id_list = ToCrawl.objects.filter(is_crawled=False).values_list('store_app_id', flat=True).distinct()
 
-app_id_list = RankingsAnalytics.objects.filter(n_observations__gte=10, single_gaps__lte=1, two_cons_gaps=0, three_cons_gaps=0, four_plus_cons_gaps=0).order_by('store_app_id').values_list('store_app_id', flat=True).distinct()
+app_id_list = RankingsAnalytics.objects.filter(n_observations__gte=5, single_gaps__lte=1, two_cons_gaps=0, three_cons_gaps=0, four_plus_cons_gaps=0).order_by('store_app_id').values_list('store_app_id', flat=True).distinct()
 
 crawled_apps = App.objects.all().values_list('store_app_id', flat=True).distinct()
 # app_id_list = open('app_list_1.csv', 'r').read().split('\n')
@@ -62,7 +62,7 @@ def get_app_details():
     NA_apps_file.close()
 
 def get_reviews():
-    app_list = App.objects.filter(is_reviews_crawled=False).order_by('total_pages')
+    app_list = App.objects.filter(is_reviews_crawled=False, total_reviews__lte=10082.5).order_by('total_pages')
     for app in app_list:
         # print gc.collect()
         while True:
@@ -96,4 +96,4 @@ def get_reviews():
         app.save()
 
 get_app_details()
-# get_reviews()
+get_reviews()
