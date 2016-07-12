@@ -36,6 +36,7 @@ class App(models.Model):
     total_reviews = models.IntegerField(blank=True, null=True)
 
     is_reviews_crawled = models.BooleanField(default=False)
+    is_releasenotes_crawled = models.BooleanField(default=False)
     crawled_on = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
@@ -51,6 +52,18 @@ class ReleaseNote(models.Model):
 
     def __unicode__(self):
         return self.id
+
+class AppAnnieReleaseNote(models.Model):
+    app = models.ForeignKey(App)
+    version = models.CharField(max_length=200)
+    date = models.DateTimeField()
+    note = models.TextField(blank=True, null=True)
+
+    crawled_on = models.DateTimeField(auto_now_add=True)
+
+    def __unicode__(self):
+        return self.id
+
 
 #--------------------------------------------------------#
 class Ranking(models.Model):
