@@ -95,5 +95,5 @@ def get_reviews():
         app.is_reviews_crawled = True
         app.save()
 
-get_app_details()
+# get_app_details()
 get_reviews()

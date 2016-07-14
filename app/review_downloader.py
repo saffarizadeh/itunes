@@ -8,7 +8,7 @@ import time
 from pymongo import MongoClient
 import datetime
 import requests
-
+import random
 
 
 
@@ -91,7 +91,7 @@ class ReviewCrawler(object):
             self.start_page = self.finish_page
             if self.finish_page >= self.total_pages:
                 break
-            time.sleep(5)
+            time.sleep(random.randint(0,1))
 
     def complete_last_thread(self):
         new_app_id = self.app_id
@@ -116,7 +116,10 @@ class ReviewCrawler(object):
             self.get_total_pages()
             self.db.itunes.delete_many({'store_app_id':self.app_id}) #remove previously added pages for this ID
             self.chunk_download(chunk_size=5000)
-            os.remove(self.tmp_folder+'lastpage.txt')
-            os.remove(self.tmp_folder+'lastapp.txt')
+            try:
+                os.remove(self.tmp_folder+'lastpage.txt')
+                os.remove(self.tmp_folder+'lastapp.txt')
+            except:
+                print('No reviews!')
         # self.client.close()
 
