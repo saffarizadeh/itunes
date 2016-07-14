@@ -66,53 +66,54 @@ class AppAnnieReleaseNote(models.Model):
 
 
 #--------------------------------------------------------#
-class Ranking(models.Model):
-    app = models.ForeignKey(App) #category is included in app
-    type = models.CharField(max_length=20) #free, paid, grossing
-    rank = models.IntegerField(blank=True, null=True)
-    date = models.DateTimeField()
+# class Ranking(models.Model):
+#     app = models.ForeignKey(App) #category is included in app
+#     type = models.CharField(max_length=20) #free, paid, grossing
+#     rank = models.IntegerField(blank=True, null=True)
+#     date = models.DateTimeField()
+#
+#     crawled_on = models.DateTimeField(auto_now_add=True)
+#
+#     def __unicode__(self):
+#         return self.id
 
-    crawled_on = models.DateTimeField(auto_now_add=True)
+# class Rating(models.Model):
+#     app = models.ForeignKey(App)
+#     date = models.DateTimeField()
+#     five_stars = models.BigIntegerField(default=0)
+#     four_stars = models.BigIntegerField(default=0)
+#     three_stars = models.BigIntegerField(default=0)
+#     two_stars = models.BigIntegerField(default=0)
+#     one_stars = models.BigIntegerField(default=0)
+#
+#     crawled_on = models.DateTimeField(auto_now_add=True)
+#
+#     def __unicode__(self):
+#         return self.id
 
-    def __unicode__(self):
-        return self.id
+# class User(models.Model):
+#     username = models.CharField(max_length=200)
+#     user_apple_id = models.BigIntegerField(default=0)
+#     user_reviews_url = models.URLField(blank=True, null=True)
+#     # We could use an M2M structure to connect reviews to users;
+#     # but for the sake of simplicity we didn't use it.
+#     def __unicode__(self):
+#         return self.id
 
-class Rating(models.Model):
-    app = models.ForeignKey(App)
-    date = models.DateTimeField()
-    five_stars = models.BigIntegerField(default=0)
-    four_stars = models.BigIntegerField(default=0)
-    three_stars = models.BigIntegerField(default=0)
-    two_stars = models.BigIntegerField(default=0)
-    one_stars = models.BigIntegerField(default=0)
+# class Review(models.Model):
+#     app = models.ForeignKey(App)
+#     appfigures_id = models.IntegerField(blank=True, null=True)
+#     user = models.ForeignKey(User)
+#     review_id = models.BigIntegerField(default=0)
+#     title = models.CharField(max_length=400)
+#     body = models.TextField(blank=True, null=True)
+#     star_rating = models.IntegerField(default=0)
+#     date = models.DateTimeField()
+#
+#     crawled_on = models.DateTimeField(auto_now_add=True)
+#     def __unicode__(self):
+#         return self.id
 
-    crawled_on = models.DateTimeField(auto_now_add=True)
-
-    def __unicode__(self):
-        return self.id
-
-class User(models.Model):
-    username = models.CharField(max_length=200)
-    user_apple_id = models.BigIntegerField(default=0)
-    user_reviews_url = models.URLField(blank=True, null=True)
-    # We could use an M2M structure to connect reviews to users;
-    # but for the sake of simplicity we didn't use it.
-    def __unicode__(self):
-        return self.id
-
-class Review(models.Model):
-    app = models.ForeignKey(App)
-    appfigures_id = models.IntegerField(blank=True, null=True)
-    user = models.ForeignKey(User)
-    review_id = models.BigIntegerField(default=0)
-    title = models.CharField(max_length=400)
-    body = models.TextField(blank=True, null=True)
-    star_rating = models.IntegerField(default=0)
-    date = models.DateTimeField()
-
-    crawled_on = models.DateTimeField(auto_now_add=True)
-    def __unicode__(self):
-        return self.id
 class ReviewFlat(models.Model):
     store_app_id = models.IntegerField()
     appfigures_id = models.IntegerField(blank=True, null=True)
@@ -161,16 +162,16 @@ class ReviewReleaseNoteSim(models.Model):
     def __unicode__(self):
         return self.id
 
-class ToCrawl(models.Model):
-    store_app_id = models.BigIntegerField(default=0)
-    name = models.CharField(max_length=200, default='-')
-    rank_type = models.CharField(max_length=20)
-    rank = models.IntegerField(blank=True, null=True)
-    date = models.DateTimeField()
-
-    is_crawled = models.BooleanField(default=False)
-    def __unicode__(self):
-        return self.id
+# class ToCrawl(models.Model):
+#     store_app_id = models.BigIntegerField(default=0)
+#     name = models.CharField(max_length=200, default='-')
+#     rank_type = models.CharField(max_length=20)
+#     rank = models.IntegerField(blank=True, null=True)
+#     date = models.DateTimeField()
+#
+#     is_crawled = models.BooleanField(default=False)
+#     def __unicode__(self):
+#         return self.id
 
 class AppAnnieRankings(models.Model):
     store_app_id = models.IntegerField(default=0)

@@ -13,7 +13,7 @@ INSTALLED_APPS = (
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'itunes_lp',
+        'NAME': 'itunes_lp1',
         'USER': 'postgres',
         'PASSWORD': 'linux116',
         'HOST': 'localhost',
