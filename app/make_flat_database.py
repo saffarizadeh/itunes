@@ -14,7 +14,7 @@ from app.models import *
 
 for app in App.objects.filter(is_reviews_crawled=True):
     reviewsreleasenotes = []
-    for releasenote in ReleaseNote.objects.filter(app=app):
+    for releasenote in ReleaseNote.objects.filter(app=app):#.order_by('date')[1:]
         reviewsreleasenotes.append(ReviewReleaseNoteFlat(store_app_id=app.store_app_id,
                                                          is_review=False,
                                                          version=releasenote.version,

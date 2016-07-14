@@ -15,7 +15,7 @@ from dateutil.rrule import rrule, MONTHLY
 from dateutil.relativedelta import relativedelta
 import datetime
 
-GLOBAL_FIRST_DATE = datetime.datetime(2013, 1, 1)
+GLOBAL_FIRST_DATE = datetime.datetime(2014, 1, 1)
 GLOBAL_LAST_DATE = datetime.datetime(2016, 1, 1)
 
 # store_app_id=353263352
@@ -24,44 +24,19 @@ app_ids = App.objects.filter(is_reviews_crawled=True).order_by('id').values_list
 for store_app_id in app_ids:
     print(store_app_id)
     app = App.objects.get(store_app_id=store_app_id)
+
+    ''' order_by('-n_observations')[0] returns the category-chart with most observations '''
     try:
-        app_rankinganalytics = RankingsAnalytics.objects.filter(store_app_id=store_app_id, rank_type__in=['free', 'paid'], n_observations__gte=20,
+        app_rankinganalytics = RankingsAnalytics.objects.filter(store_app_id=store_app_id, rank_type__in=['free', 'paid'], n_observations__gte=5,
                                                              single_gaps__lte=1, two_cons_gaps=0, three_cons_gaps=0,
                                                              four_plus_cons_gaps=0).order_by('-n_observations')[0]
     except:
-        app_rankinganalytics = RankingsAnalytics.objects.filter(store_app_id=store_app_id, rank_type='grossing', n_observations__gte=20,
+        app_rankinganalytics = RankingsAnalytics.objects.filter(store_app_id=store_app_id, rank_type='grossing', n_observations__gte=5,
                                                              single_gaps__lte=1, two_cons_gaps=0, three_cons_gaps=0,
                                                              four_plus_cons_gaps=0).order_by('-n_observations')[0]
     rank_type = app_rankinganalytics.rank_type
     category = app_rankinganalytics.category
-    # category_map = {
-    # 'Book': 'books',
-    # 'Business': 'business',
-    # 'Catalogs': 'catalogs',
-    # 'Education': 'education',
-    # 'Entertainment': 'entertainment',
-    # 'Finance': 'finance',
-    # 'Food & Drink': 'food-and-drink',
-    # 'Games': 'games',
-    # 'Health & Fitness': 'health-and-fitness',
-    # 'Lifestyle': 'lifestyle',
-    # 'Medical': 'medical',
-    # 'Music': 'music',
-    # 'Navigation': 'navigation',
-    # 'News': 'news',
-    # 'Newsstand': 'newsstand',
-    # 'Photo & Video': 'photo-and-video',
-    # 'Productivity': 'productivity',
-    # 'Reference': 'reference',
-    # 'Shopping': 'shopping',
-    # 'Social Networking': 'social-networking',
-    # 'Sports': 'sports',
-    # 'Travel': 'travel',
-    # 'Utilities': 'utilities',
-    # 'Weather': 'weather'
-    # }
-    # category = category_map[category]
-
+    print(category)
     # free = AppAnnieRankings.objects.filter(store_app_id=store_app_id, category=category,rank_type='free').count()
     # paid = AppAnnieRankings.objects.filter(store_app_id=store_app_id, category=category,rank_type='paid').count()
     # grossing = AppAnnieRankings.objects.filter(store_app_id=store_app_id, category=category,rank_type='grossing').count()
@@ -73,21 +48,23 @@ for store_app_id in app_ids:
     #     rank_type = 'grossing'
 
     releasenotes = ReviewReleaseNoteFlat.objects.filter(store_app_id=store_app_id, is_review=False).order_by('id')
+    ''' in appannie RNs we should skip the first RN which is the first release data-point.
+        We consider this when we are making ReviewReleaseNoteFlat table'''
 
     # create app-specific time windows
     first_rn = releasenotes.earliest('date').date
     first_rn = first_rn.replace(hour=0, minute=0, second=0)
     if first_rn.day != 1:
         first_rn = first_rn.replace(day=1) + relativedelta(months=1)
-    print(category)
+
     first_appearance_on_charts = AppAnnieRankings.objects.filter(store_app_id=store_app_id, category=category, rank_type=rank_type).earliest('date').date
     first_appearance_on_charts = first_appearance_on_charts.replace(hour=0, minute=0, second=0)
 
-    start_date = max(first_rn+relativedelta(months=2), first_appearance_on_charts+relativedelta(months=1))
+    start_date = max(first_rn+relativedelta(months=2), first_appearance_on_charts+relativedelta(months=1), GLOBAL_FIRST_DATE)
 
     last_appearance_on_charts = AppAnnieRankings.objects.filter(store_app_id=store_app_id, category=category, rank_type=rank_type).latest('date').date
     last_rn = releasenotes.latest('date').date
-    end_date = min(last_appearance_on_charts, last_rn)
+    end_date = min(last_appearance_on_charts, last_rn, GLOBAL_LAST_DATE)
 
     leadusers_dict = {}
     leadusers = ReviewReleaseNoteFlat.objects.filter(store_app_id=store_app_id, is_review=True).values('user_apple_id').annotate(Count('id')).order_by().filter(id__count__gt=1)
@@ -97,6 +74,7 @@ for store_app_id in app_ids:
     new_leadusers_cumu = 0
     panel_data = []
     rank_t_1 = None
+    rank_t_p_1 = 'Not calculated!'
     for window in rrule(MONTHLY, dtstart=start_date, until=end_date):
         date_t_1 = window - relativedelta(months=1)
         date_t_2 = window - relativedelta(months=2)
@@ -109,23 +87,27 @@ for store_app_id in app_ids:
                 try:
                     rank_t_2 = AppAnnieRankings.objects.get(store_app_id=store_app_id, category=category, rank_type=rank_type, date=date_t_2).rank
                     rank_t = AppAnnieRankings.objects.get(store_app_id=store_app_id, category=category, rank_type=rank_type, date=window).rank
-                    rank_t_1 = (rank_t + rank_t_2)/2 #int
+                    rank_t_1 = (rank_t + rank_t_2)/2 # gives an int number
                 except:
                     rank_t_1 = None
-        try:
-            rank_t_p_1 = AppAnnieRankings.objects.get(store_app_id=store_app_id, category=category, rank_type=rank_type, date=date_t_p_1).rank
-        except:
-            try:
-                rank_t_p_2 = AppAnnieRankings.objects.get(store_app_id=store_app_id, category=category, rank_type=rank_type, date=date_t_p_2).rank
-                rank_t = AppAnnieRankings.objects.get(store_app_id=store_app_id, category=category, rank_type=rank_type, date=window).rank
-                rank_t_p_1 = (rank_t + rank_t_p_2) / 2  # int
-            except:
-                rank_t_p_1 = None
+
         try:
             rank = AppAnnieRankings.objects.get(store_app_id=store_app_id, category=category, rank_type=rank_type, date=window).rank
         except:
             try:
-                rank = (rank_t_p_1 + rank_t_1)/2 #int
+                rank_t_p_1 = AppAnnieRankings.objects.get(store_app_id=store_app_id, category=category,
+                                                          rank_type=rank_type, date=date_t_p_1).rank
+            except:
+                try:
+                    rank_t_p_2 = AppAnnieRankings.objects.get(store_app_id=store_app_id, category=category,
+                                                              rank_type=rank_type, date=date_t_p_2).rank
+                    rank_t = AppAnnieRankings.objects.get(store_app_id=store_app_id, category=category,
+                                                          rank_type=rank_type, date=window).rank
+                    rank_t_p_1 = (rank_t + rank_t_p_2) / 2  # gives an int number
+                except:
+                    rank_t_p_1 = None
+            try:
+                rank = (rank_t_p_1 + rank_t_1)/2 # gives an int number
             except:
                 rank = None
 
@@ -134,6 +116,18 @@ for store_app_id in app_ids:
         rn_t = ReviewReleaseNoteFlat.objects.filter(store_app_id=store_app_id, is_review=False, date__range=(window-relativedelta(months=1), window))
         rn_t_1 = ReviewReleaseNoteFlat.objects.filter(store_app_id=store_app_id, is_review=False, date__range=(window-relativedelta(months=2), window-relativedelta(months=1)))
         rn_t_2 = ReviewReleaseNoteFlat.objects.filter(store_app_id=store_app_id, is_review=False, date__range=(window-relativedelta(months=3), window-relativedelta(months=2)))
+
+        forward_rn_count =  rn_t.count() + rn_t_1.count()
+        if forward_rn_count:
+            forward_rn_exists = 1
+        else:
+            forward_rn_exists = 0
+
+        backward_rn_count =  rn_t_2.count() + rn_t_1.count()
+        if backward_rn_count:
+            backward_rn_exists = 1
+        else:
+            backward_rn_exists = 0
 
         forward_feedback_t = ReviewReleaseNoteSim.objects.filter(store_app_id=store_app_id, similarity__gt= 0.2,releasenote__in=rn_t, date__range=(window-relativedelta(months=3), window-relativedelta(months=1))).count()
         forward_feedback_t_1 = ReviewReleaseNoteSim.objects.filter(store_app_id=store_app_id, similarity__gt= 0.2,releasenote__in=rn_t_1, date__range=(window-relativedelta(months=3), window-relativedelta(months=2))).count()
@@ -174,7 +168,7 @@ for store_app_id in app_ids:
                                       category=category,
                                       age=age.days,
                                       type=rank_type,
-                                      new_leadusers_cumu=new_leadusers_cumu,
+                                      leadusers_cumu=new_leadusers_cumu,
                                       window=window,
                                       rank_improvement=rank_improvement,
                                       forward_feedback_volume=forward_feedback_volume,
@@ -182,9 +176,44 @@ for store_app_id in app_ids:
                                       backward_engagement_neg=backward_engagement_neg,
                                       version_cumu_volume=version_cumu_volume,
                                       total_cumu_volume=total_cumu_volume,
-                                      rank=rank
+                                      rank=rank,
+                                      rank_t_1=rank_t_1,
+                                      forward_rn_count=forward_rn_count,
+                                      forward_rn_exists=forward_rn_exists,
+                                      backward_rn_count=backward_rn_count,
+                                      backward_rn_exists=backward_rn_exists,
                                       )
         )
         print(rank_t_1, rank, rank_t_p_1, rank_improvement)
         rank_t_1 = rank
     PanelData.objects.bulk_create(panel_data, batch_size=100000)
+
+
+
+    # category_map = {
+    # 'Book': 'books',
+    # 'Business': 'business',
+    # 'Catalogs': 'catalogs',
+    # 'Education': 'education',
+    # 'Entertainment': 'entertainment',
+    # 'Finance': 'finance',
+    # 'Food & Drink': 'food-and-drink',
+    # 'Games': 'games',
+    # 'Health & Fitness': 'health-and-fitness',
+    # 'Lifestyle': 'lifestyle',
+    # 'Medical': 'medical',
+    # 'Music': 'music',
+    # 'Navigation': 'navigation',
+    # 'News': 'news',
+    # 'Newsstand': 'newsstand',
+    # 'Photo & Video': 'photo-and-video',
+    # 'Productivity': 'productivity',
+    # 'Reference': 'reference',
+    # 'Shopping': 'shopping',
+    # 'Social Networking': 'social-networking',
+    # 'Sports': 'sports',
+    # 'Travel': 'travel',
+    # 'Utilities': 'utilities',
+    # 'Weather': 'weather'
+    # }
+    # category = category_map[category]

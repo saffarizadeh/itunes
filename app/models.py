@@ -212,12 +212,20 @@ class RankingsAnalytics(models.Model):
 
 class PanelData(models.Model):
     store_app_id = models.IntegerField(default=0)
-    category = models.CharField(max_length=200)
-    age = models.IntegerField(blank=True, null=True)
-    type = models.CharField(max_length=20)
-    rank = models.IntegerField(blank=True, null=True)
     window = models.DateTimeField()
-    new_leadusers_cumu = models.IntegerField(blank=True, null=True)
+    category = models.CharField(max_length=200)
+    type = models.CharField(max_length=20)
+    age = models.IntegerField(blank=True, null=True)
+
+    rank = models.IntegerField(blank=True, null=True)
+    rank_t_1 = models.IntegerField(blank=True, null=True)
+
+    leadusers_cumu = models.IntegerField(blank=True, null=True)
+
+    forward_rn_count = models.IntegerField(blank=True, null=True)
+    forward_rn_exists = models.IntegerField(blank=True, null=True)
+    backward_rn_count = models.IntegerField(blank=True, null=True)
+    backward_rn_exists = models.IntegerField(blank=True, null=True)
 
     rank_improvement = models.IntegerField(blank=True, null=True)
     forward_feedback_volume = models.IntegerField(blank=True, null=True)
