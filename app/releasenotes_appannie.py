@@ -9,7 +9,6 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'itunes.settings'
 import django
 django.setup()
 
-from bs4 import BeautifulSoup
 import re
 import datetime
 import lxml.html
