@@ -64,23 +64,35 @@ username.send_keys("kaminem64@yahoo.com")
 password.send_keys("linux116")
 browser.find_element_by_id("submit").click()
 
-apps = App.objects.filter(is_reviews_crawled=True).order_by('id')
+apps = App.objects.filter(is_reviews_crawled=True, is_releasenotes_crawled=False).order_by('id')
 
 for app in apps:
     app_id = app.store_app_id
     print(app_id)
+    save = True
     url = 'https://www.appannie.com/apps/ios/app/'+str(app_id)+'/details/'
     browser.get(url)
     try:
         re.search('''The data was collected from the App Store on''', browser.page_source).group()
     except:
-        raw_input("Press Enter to continue...")
-        browser.get(url)
+        try:
+            re.search('''This application has been removed from the store''', browser.page_source).group()
+            print('This application has been removed from the store!!!')
+            save = False
+        except:
+            try:
+                re.search('''This asset has been temporarily disabled due to a copyright issue''', browser.page_source).group()
+                print('This asset has been temporarily disabled due to a copyright issue!!!')
+                save = False
+            except:
+                raw_input("Press Enter to continue...")
+                browser.get(url)
     html_source = browser.page_source
     releasenotes = get_releasenote(html_source=html_source)
     create_releasenotes(app=app, releasenotes=releasenotes)
-    app.is_releasenotes_crawled=True
-    app.save()
+    if save:
+        app.is_releasenotes_crawled=True
+        app.save()
 
     sleep(random.random()*2)
 
