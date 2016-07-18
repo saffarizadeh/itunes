@@ -34,7 +34,7 @@ for category in categories:
         current_app = 0
         print('working on', number_of_apps, 'apps from', rank_type, category, 'category...')
         for store_app_id in apps:
-            app_data_points = AppAnnieRankings.objects.filter(store_app_id=store_app_id, category=category, rank_type=rank_type).order_by('date')
+            app_data_points = AppAnnieRankings.objects.filter(store_app_id=store_app_id, category=category, rank_type=rank_type, date__range=(start_date, end_date)).order_by('date')
             n_appearances = app_data_points.count()
             mean_rank = app_data_points.aggregate(Avg('rank'))['rank__avg']
             first_appearance = app_data_points.earliest('date').date
@@ -96,13 +96,6 @@ for category in categories:
             std_rank = numpy.std(ranks)
             min_rank = min(ranks)
             max_rank = max(ranks)
-#             rankings_file = open('exports/rankings.csv', 'a')
-#             row = '%d;%s;%s;%d;%d;%d;%d;%f;%f;%s;%f;%f;%d;%d;%d;%d;%d;%d\n' %(store_app_id, category, rank_type, first_appearance, last_appearance,
-#                                       n_appearances, n_of_gaps, mean_gap, std_gap, gaps, mean_rank, std_rank, min_rank, max_rank, one_cons_gap,
-#                                                                               two_cons_gap, three_cons_gap, four_plus_cons_gap)
-#             rankings_file.write(row)
-#             """ Maybe later we add app name to the output table """
-# rankings_file.close()
 
             ranking_analytics.append(
                 RankingsAnalytics(store_app_id=store_app_id,
