@@ -12,9 +12,9 @@ django.setup()
 
 from app.models import *
 
-for app in App.objects.filter(is_reviews_crawled=True):
+for app in App.objects.filter(is_reviews_crawled=True, is_releasenotes_crawled=True):
     reviewsreleasenotes = []
-    for releasenote in ReleaseNote.objects.filter(app=app):#.order_by('date')[1:]
+    for releasenote in AppAnnieReleaseNote.objects.filter(app=app).order_by('date')[1:]:#.order_by('date')[1:]
         reviewsreleasenotes.append(ReviewReleaseNoteFlat(store_app_id=app.store_app_id,
                                                          is_review=False,
                                                          version=releasenote.version,
@@ -22,7 +22,7 @@ for app in App.objects.filter(is_reviews_crawled=True):
                                                          date=releasenote.date,
                                                          crawled_on=releasenote.crawled_on)
                                    )
-    for review in ReviewFlat.objects.filter(store_app_id=app.store_app_id):
+    for review in ReviewFlat.objects.filter(store_app_id=app.store_app_id).order_by('date'):
         if review.title and review.body:
             body = review.title + ' . ' + review.body
         elif not review.title and review.body:

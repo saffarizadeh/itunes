@@ -82,7 +82,7 @@ def tokenize_lemmatizer(text):
 
 
 # app_ids = ReviewReleaseNoteFlat.objects.all().order_by('store_app_id').values_list('store_app_id',flat=True).distinct()[:100]
-app_ids = App.objects.filter(is_reviews_crawled=True).order_by('id').values_list('store_app_id',flat=True)
+app_ids = App.objects.filter(is_reviews_crawled=True, is_releasenotes_crawled=True).order_by('id').values_list('store_app_id',flat=True)
 # print(app_ids)
 tfidf_db_map = {}
 class CleanDocuments(object):
