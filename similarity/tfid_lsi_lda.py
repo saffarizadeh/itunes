@@ -24,6 +24,8 @@ from nltk.tokenize import TweetTokenizer
 from gensim import matutils
 from gensim import models
 from gensim.similarities import MatrixSimilarity, SparseMatrixSimilarity, Similarity
+import datetime
+
 
 stemmer = PorterStemmer()
 lemmatizer = WordNetLemmatizer()
@@ -80,6 +82,8 @@ def tokenize_lemmatizer(text):
 #
 
 
+GLOBAL_FIRST_DATE = datetime.datetime(2013, 11, 1)
+GLOBAL_LAST_DATE = datetime.datetime(2016, 1, 1)
 
 # app_ids = ReviewReleaseNoteFlat.objects.all().order_by('store_app_id').values_list('store_app_id',flat=True).distinct()[:100]
 app_ids = App.objects.filter(is_reviews_crawled=True, is_releasenotes_crawled=True).order_by('id').values_list('store_app_id',flat=True)
@@ -88,7 +92,7 @@ tfidf_db_map = {}
 class CleanDocuments(object):
     def __iter__(self):
         index = 0
-        for document in ReviewReleaseNoteFlat.objects.filter(store_app_id__in=app_ids).order_by('id'): #id >= 3717281   .filter(store_app_id=353263352)
+        for document in ReviewReleaseNoteFlat.objects.filter(store_app_id__in=app_ids, date__range=(GLOBAL_FIRST_DATE, GLOBAL_LAST_DATE)).order_by('id'):
             tfidf_db_map.update({document.id:index})
             index += 1
             yield document.body
