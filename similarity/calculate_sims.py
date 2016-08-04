@@ -87,23 +87,27 @@ for app_id in app_ids:
     # lsi_reviews_vecs = np.delete(lsi_reviews_vecs,0,0)
 
     try:
-        print('First RN: ', releasenotes[0].id)
-        print('Last RN: ', releasenotes.order_by('-id')[0].id)
+        first_rn = releasenotes[0].id
+        last_rn = releasenotes.order_by('-id')[0].id
+        print('First RN: ', first_rn)
+        print('Last RN: ', last_rn)
     except:
         print('No RN!!!')
     try:
-        print('First Review: ', reviews[0].id)
-        print('Last Review: ', reviews.order_by('-id')[0].id)
+        first_review = reviews[0].id
+        last_review = reviews.order_by('-id')[0].id
+        print('First Review: ', first_review)
+        print('Last Review: ', last_review)
     except:
         print('No Review!!!')
     try:
         """ more memory intensive but faster """
-        first_releasenote_index = tfidf_db_map[releasenotes[0].id]
-        last_releasenote_index = tfidf_db_map[releasenotes.order_by('-id')[0].id]
+        first_releasenote_index = tfidf_db_map[first_rn]
+        last_releasenote_index = tfidf_db_map[last_rn]
         lsi_releasenotes_vecs = gensim.matutils.corpus2dense(lsi_model[gensim_tfidf[first_releasenote_index:last_releasenote_index+1]], num_topics)
 
-        first_review_index = tfidf_db_map[reviews[0].id]
-        last_review_index = tfidf_db_map[reviews.order_by('-id')[0].id]
+        first_review_index = tfidf_db_map[first_review]
+        last_review_index = tfidf_db_map[last_review]
         lsi_reviews_vecs = gensim.matutils.corpus2dense(lsi_model[gensim_tfidf[first_review_index:last_review_index+1]], num_topics)
         lsi_similarity_cosine = cosine_similarity(lsi_reviews_vecs.T, lsi_releasenotes_vecs.T)
 
