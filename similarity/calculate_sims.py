@@ -21,7 +21,7 @@ from nltk.stem.porter import PorterStemmer
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import TweetTokenizer
 from gensim import matutils
-
+import datetime
 
 stemmer = PorterStemmer()
 lemmatizer = WordNetLemmatizer()
@@ -40,13 +40,23 @@ def tokenize_stemmer(text):
     else:
         return []
 
+GLOBAL_FIRST_DATE = datetime.datetime(2013, 11, 1)
+GLOBAL_LAST_DATE = datetime.datetime(2016, 1, 1)
+
 app_ids = ReviewReleaseNoteFlat.objects.all().order_by('store_app_id').values_list('store_app_id',flat=True).distinct()
 # app_ids = App.objects.filter(is_reviews_crawled=True).order_by('id').values_list('store_app_id',flat=True)
+tfidf_db_map = pickle.load( open( "exports/tfidf_db_map.p", "rb" ) )
+print('getting doc ids...')
+doc_ids = tfidf_db_map.keys()
+print(len(doc_ids))
+app_ids = ReviewReleaseNoteFlat.objects.filter(id__in=doc_ids, date__range=(GLOBAL_FIRST_DATE, GLOBAL_LAST_DATE)).order_by('store_app_id').values_list('store_app_id',flat=True).distinct()
+print(len(app_ids))
+print('doc ids retrieved!')
 
 num_topics = 300
 tfidf = pickle.load( open( "exports/tfidf.p", "rb" ) )
 # vectorizer = pickle.load( open( "exports/vectorizer.p", "rb" ) )
-tfidf_db_map = pickle.load( open( "exports/tfidf_db_map.p", "rb" ) )
+
 corpus_gensim = pickle.load( open( "exports/corpus_gensim.p", "rb" ) )
 gensim_tfidf = list(corpus_gensim)
 lsi_model = gensim.models.LsiModel.load('exports/lsi.model')
@@ -57,8 +67,8 @@ print(len(gensim_tfidf))
 
 for app_id in app_ids:
     print(app_id)
-    releasenotes = ReviewReleaseNoteFlat.objects.filter(store_app_id=app_id, is_review=False).order_by('id')
-    reviews = ReviewReleaseNoteFlat.objects.filter(store_app_id=app_id, is_review=True).order_by('id')
+    releasenotes = ReviewReleaseNoteFlat.objects.filter(store_app_id=app_id, is_review=False, date__range=(GLOBAL_FIRST_DATE, GLOBAL_LAST_DATE)).order_by('id')
+    reviews = ReviewReleaseNoteFlat.objects.filter(store_app_id=app_id, is_review=True, date__range=(GLOBAL_FIRST_DATE, GLOBAL_LAST_DATE)).order_by('id')
     # lsi_releasenotes_vecs = np.zeros((1, num_topics))
     # lsi_reviews_vecs = np.zeros((1, num_topics))
     # count = 0

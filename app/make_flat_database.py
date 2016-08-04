@@ -21,7 +21,7 @@ for app in App.objects.filter(is_reviews_crawled=True, is_releasenotes_crawled=T
     print(app.store_app_id)
     """ Removing Release Notes Duplicate Sentences (we keep first appearance of a sentence) """
     new_rns = []
-    vectorizer = TfidfVectorizer(min_df=1)
+    vectorizer = TfidfVectorizer(min_df=1, lowercase=True)
     rn_sents = []
     index={}
     for i, releasenote in enumerate(AppAnnieReleaseNote.objects.filter(app=app).order_by('date')[1:]):

@@ -86,7 +86,10 @@ GLOBAL_FIRST_DATE = datetime.datetime(2013, 11, 1)
 GLOBAL_LAST_DATE = datetime.datetime(2016, 1, 1)
 
 # app_ids = ReviewReleaseNoteFlat.objects.all().order_by('store_app_id').values_list('store_app_id',flat=True).distinct()[:100]
-app_ids = App.objects.filter(is_reviews_crawled=True, is_releasenotes_crawled=True).order_by('id').values_list('store_app_id',flat=True)
+app_ids = list(App.objects.filter(is_reviews_crawled=True, is_releasenotes_crawled=True).order_by('id').values_list('store_app_id',flat=True))
+from random import shuffle
+shuffle(app_ids)
+app_ids = app_ids[:4000]
 # print(app_ids)
 tfidf_db_map = {}
 class CleanDocuments(object):
