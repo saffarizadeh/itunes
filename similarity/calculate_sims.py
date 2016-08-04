@@ -43,7 +43,7 @@ def tokenize_stemmer(text):
 GLOBAL_FIRST_DATE = datetime.datetime(2013, 11, 1)
 GLOBAL_LAST_DATE = datetime.datetime(2016, 1, 1)
 
-app_ids = ReviewReleaseNoteFlat.objects.all().order_by('store_app_id').values_list('store_app_id',flat=True).distinct()
+# app_ids = ReviewReleaseNoteFlat.objects.all().order_by('store_app_id').values_list('store_app_id',flat=True).distinct()
 # app_ids = App.objects.filter(is_reviews_crawled=True).order_by('id').values_list('store_app_id',flat=True)
 tfidf_db_map = pickle.load( open( "exports/tfidf_db_map.p", "rb" ) )
 print('getting doc ids...')
@@ -86,41 +86,54 @@ for app_id in app_ids:
     #
     # lsi_reviews_vecs = np.delete(lsi_reviews_vecs,0,0)
 
-    """ more memory intensive but faster """
-    first_releasenote_index = tfidf_db_map[releasenotes[0].id]
-    last_releasenote_index = tfidf_db_map[releasenotes.order_by('-id')[0].id]
-    lsi_releasenotes_vecs = gensim.matutils.corpus2dense(lsi_model[gensim_tfidf[first_releasenote_index:last_releasenote_index+1]], num_topics)
+    try:
+        print('First RN: ', releasenotes[0].id)
+        print('Last RN: ', releasenotes.order_by('-id')[0].id)
+    except:
+        print('No RN!!!')
+    try:
+        print('First Review: ', reviews[0].id)
+        print('Last Review: ', reviews.order_by('-id')[0].id)
+    except:
+        print('No Review!!!')
+    try:
+        """ more memory intensive but faster """
+        first_releasenote_index = tfidf_db_map[releasenotes[0].id]
+        last_releasenote_index = tfidf_db_map[releasenotes.order_by('-id')[0].id]
+        lsi_releasenotes_vecs = gensim.matutils.corpus2dense(lsi_model[gensim_tfidf[first_releasenote_index:last_releasenote_index+1]], num_topics)
 
-    first_review_index = tfidf_db_map[reviews[0].id]
-    last_review_index = tfidf_db_map[reviews.order_by('-id')[0].id]
-    lsi_reviews_vecs = gensim.matutils.corpus2dense(lsi_model[gensim_tfidf[first_review_index:last_review_index+1]], num_topics)
-    lsi_similarity_cosine = cosine_similarity(lsi_reviews_vecs.T, lsi_releasenotes_vecs.T)
+        first_review_index = tfidf_db_map[reviews[0].id]
+        last_review_index = tfidf_db_map[reviews.order_by('-id')[0].id]
+        lsi_reviews_vecs = gensim.matutils.corpus2dense(lsi_model[gensim_tfidf[first_review_index:last_review_index+1]], num_topics)
+        lsi_similarity_cosine = cosine_similarity(lsi_reviews_vecs.T, lsi_releasenotes_vecs.T)
 
-    print(releasenotes.count()+reviews.count())
-    print('rn', releasenotes.count(), lsi_releasenotes_vecs.shape)
-    print('rv', reviews.count(), lsi_reviews_vecs.shape)
-    print(lsi_similarity_cosine.shape)
+        print(releasenotes.count()+reviews.count())
+        print('rn', releasenotes.count(), lsi_releasenotes_vecs.shape)
+        print('rv', reviews.count(), lsi_reviews_vecs.shape)
+        print(lsi_similarity_cosine.shape)
 
-    reviewrelease_objs = []
-    for j, releasenote in enumerate(releasenotes):
-       for i, review in enumerate(reviews):
-           reviewrelease_objs.append(
-                           ReviewReleaseNoteSim(store_app_id=app_id,
-                                                releasenote=releasenote,
-                                                review=review,
-                                                star_rating=review.star_rating,
-                                                user_apple_id=review.user_apple_id,
-                                                version=releasenote.version,
-                                                date=review.date,
-                                                word_count=len(review.body.split(' ')),
-                                                similarity=lsi_similarity_cosine[i][j]
-                                                )
-           )
-    ReviewReleaseNoteSim.objects.bulk_create(reviewrelease_objs, batch_size=100000)
-           # count = len(review.body.split(' '))
-           # if lsi_similarity_cosine[i][j]>0.50 and count>20:
-           #     print(lsi_similarity_cosine[i][j])
-           #     print('count: ', count)
-           #     print(releasenote.body)
-           #     print(review.body)
-           #     print('*-------------------------------------------*')
+        reviewrelease_objs = []
+        for j, releasenote in enumerate(releasenotes):
+           for i, review in enumerate(reviews):
+               reviewrelease_objs.append(
+                               ReviewReleaseNoteSim(store_app_id=app_id,
+                                                    releasenote=releasenote,
+                                                    review=review,
+                                                    star_rating=review.star_rating,
+                                                    user_apple_id=review.user_apple_id,
+                                                    version=releasenote.version,
+                                                    date=review.date,
+                                                    word_count=len(review.body.split(' ')),
+                                                    similarity=lsi_similarity_cosine[i][j]
+                                                    )
+               )
+        ReviewReleaseNoteSim.objects.bulk_create(reviewrelease_objs, batch_size=100000)
+               # count = len(review.body.split(' '))
+               # if lsi_similarity_cosine[i][j]>0.50 and count>20:
+               #     print(lsi_similarity_cosine[i][j])
+               #     print('count: ', count)
+               #     print(releasenote.body)
+               #     print(review.body)
+               #     print('*-------------------------------------------*')
+    except:
+        print('Some error: maybe no RN or Review^')
