@@ -26,6 +26,8 @@ from gensim import models
 from gensim.similarities import MatrixSimilarity, SparseMatrixSimilarity, Similarity
 import datetime
 
+GLOBAL_FIRST_DATE = datetime.datetime(2013, 11, 1)
+GLOBAL_LAST_DATE = datetime.datetime(2016, 1, 1)
 
 stemmer = PorterStemmer()
 lemmatizer = WordNetLemmatizer()
@@ -51,39 +53,6 @@ def tokenize_lemmatizer(text):
     else:
         return []
 
-
-
-# """ clean release notes """
-# print('Removing Dupicates From Release Notes...')
-# for app_id in apps.keys():
-#     vectorizer = TfidfVectorizer(min_df=1)
-#     releasenotes = apps[app_id]['release_notes']
-#     rn_sents = []
-#     index={}
-#     for i, rn in enumerate(releasenotes):
-#         sents = sent_tokenize(rn.replace('\n','.'))
-#         index[i] = [j for j in range(len(rn_sents), len(rn_sents)+len(sents))]
-#         rn_sents.extend(sents)
-#     try:
-#         rn_vectors = vectorizer.fit_transform(rn_sents)
-#         rn_similarity = cosine_similarity(rn_vectors,rn_vectors)
-#         np.fill_diagonal(rn_similarity, 0)
-#         #~ rn_similarity = np.triu(rn_similarity)
-#         where = np.where(rn_similarity>0.8)
-#         similar_rn_reviews =list(set(where[0]))
-#
-#         new_rns = []
-#         for sent_index in index.values():
-#             rn = '. '.join([rn_sents[sent] for sent in sent_index if sent not in similar_rn_reviews])
-#             new_rns.append(rn)
-#         apps[app_id]['release_notes'] = new_rns
-#     except:
-#         pass
-#
-
-
-GLOBAL_FIRST_DATE = datetime.datetime(2013, 11, 1)
-GLOBAL_LAST_DATE = datetime.datetime(2016, 1, 1)
 
 # app_ids = ReviewReleaseNoteFlat.objects.all().order_by('store_app_id').values_list('store_app_id',flat=True).distinct()[:100]
 app_ids = list(App.objects.filter(is_reviews_crawled=True, is_releasenotes_crawled=True).order_by('id').values_list('store_app_id',flat=True))

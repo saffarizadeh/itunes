@@ -85,7 +85,7 @@ for app_id in app_ids:
     #     count += 1
     #
     # lsi_reviews_vecs = np.delete(lsi_reviews_vecs,0,0)
-
+    first_rn, last_rn, first_review, last_review = None
     try:
         first_rn = releasenotes[0].id
         last_rn = releasenotes.order_by('-id')[0].id
