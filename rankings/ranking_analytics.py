@@ -24,7 +24,7 @@ import math
 #                     min_rank;max_rank;single_gaps;two_cons_gaps;three_cons_gaps;four_plus_cons_gaps\n')
 # rankings_file.close()
 categories = AppAnnieRankings.objects.order_by('category').values_list('category', flat=True).distinct()
-start_date = datetime.datetime.strptime('2014-01-01', '%Y-%m-%d')
+start_date = datetime.datetime.strptime('2013-11-01', '%Y-%m-%d')
 end_date = datetime.datetime.strptime('2016-01-01', '%Y-%m-%d')
 for category in categories:
     for rank_type in ['free', 'paid']:#, 'grossing']:

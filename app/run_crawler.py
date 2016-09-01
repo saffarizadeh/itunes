@@ -34,7 +34,7 @@ def get_app_details():
                 app_details_crawler = AppCrawler(app_id=store_app_id, app_store=app_store)
                 created = app_details_crawler.get_app()
                 if created:
-                    app_to_crawl = ToCrawl.objects.filter(store_app_id=store_app_id)
+                    app_to_crawl = ToCrawl.objects.filter(store_app_id=store_app_id) #needs to be removed
                     app_to_crawl.update(is_crawled=True)
                 else:
                     NA_apps.append(store_app_id)
