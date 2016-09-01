@@ -129,5 +129,5 @@ python rankings/get_rankings.py
 -----------------------
 Process
 -----------------------
-Download Rankings -> Analyze Rankings -> Download Reviews -> Create LSA Model -> Calculate Similarities -> Create Panel Data
+Download Rankings -> Analyze Rankings -> Download Reviews -> Download All Release Notes -> Create a Flat DB -> Create LSA or LDA Model -> Calculate Similarities -> Create Panel Data
 
