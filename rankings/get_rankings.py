@@ -12,6 +12,7 @@ django.setup()
 from bs4 import BeautifulSoup
 import re
 import datetime
+from dateutil.relativedelta import relativedelta
 import lxml.html
 from app.models import *
 
@@ -124,7 +125,7 @@ categories = ['books','business','catalogs','education','entertainment','finance
               'games','health-and-fitness','lifestyle','newsstand', 'medical','music','navigation','news','photo-and-video',
               'productivity','reference','shopping','social-networking','sports','travel','utilities','weather']
 
-# categories = ['shopping']
+categories = ['finance','games','medical','navigation','photo-and-video','shopping','social-networking']
 
 
 #------------ add 2013 (at least 4 more months
@@ -132,6 +133,12 @@ dates = ['2013-11-01', '2013-12-01', '2014-01-01', '2014-02-01', '2014-03-01', '
          '2014-07-01', '2014-08-01', '2014-09-01', '2014-10-01', '2014-11-01', '2014-12-01', '2015-01-01', '2015-02-01',
          '2015-03-01', '2015-04-01', '2015-05-01', '2015-06-01', '2015-07-01', '2015-08-01', '2015-09-01', '2015-10-01',
          '2015-11-01', '2015-12-01', '2016-01-01']
+
+dates = []
+date = datetime.date(2014, 01, 01)
+while date != datetime.date(2014, 07, 01):
+    dates.append(date)
+    date += relativedelta(days=1)
 
 for category in categories:
     for date in dates:
