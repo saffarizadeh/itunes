@@ -52,10 +52,10 @@ def create_releasenotes(app, releasenotes):
 from selenium import webdriver
 from time import sleep
 
-print 'Launching Chromium..'
+print('Launching Chromium..')
 # browser = webdriver.Firefox()
 browser = webdriver.Chrome('./../rankings/chromedriver')
-print 'Entering AppAnnie'
+print('Entering AppAnnie')
 browser.get('https://www.appannie.com/account/login/')
 
 username = browser.find_element_by_id("email")
@@ -85,7 +85,7 @@ for app in apps:
                 print('This asset has been temporarily disabled due to a copyright issue!!!')
                 save = False
             except:
-                raw_input("Press Enter to continue...")
+                input("Press Enter to continue...")
                 browser.get(url)
     html_source = browser.page_source
     releasenotes = get_releasenote(html_source=html_source)

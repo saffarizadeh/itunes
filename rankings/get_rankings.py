@@ -2,8 +2,8 @@
 __author__ = 'Kambiz'
 
 import sys
-sys.path.insert(0, '/home/kambiz/itunes')
-sys.path.insert(0, '/home/kambiz/itunes/app')
+sys.path.insert(0, '/home/kaminem64/itunes')
+sys.path.insert(0, '/home/kaminem64/itunes/app')
 import os
 os.environ['DJANGO_SETTINGS_MODULE'] = 'itunes.settings'
 import django
@@ -19,100 +19,141 @@ from app.models import *
 def get_ranking(html_source, date, category):
     html = lxml.html.fromstring(html_source)
 
+    ranking_obj = []
     rank_type='free'
     app_names=[]
+    seller_names = []
+    seller_ids = []
     store_app_ids=[]
-    ranks = range(1, len(html.xpath('//table/tbody/tr/td[1]/div/div/span[1]/span/a'))+1 )
-    for app_name in html.xpath('//table/tbody/tr/td[1]/div/div/span[1]/span/a'):
+    ranks = range(1, len(html.xpath("//tr/td[2]//*[contains(@class, 'app-name')]/span"))+1 )
+
+    for app_name in html.xpath("//tr/td[2]//*[contains(@class, 'app-name')]/span"):
         try:
             app_names.append(app_name.text[:150])
         except:
-            app_names.append('NA')
-    for store_app_id in html.xpath('//table/tbody/tr/td[1]/div/div/span[3]'):
+            app_names.append(0)
+    for img in html.xpath('//tr/td[2]/div/div/a/img'):
+        store_app_id = img.attrib['src']
         try:
-            store_app_ids.append(store_app_id.text)
+            store_app_id = re.search('ios/(.+)/', store_app_id).group(1)
+            store_app_ids.append(store_app_id)
         except:
-            store_app_ids.append('NA')
-    for rank, store_app_id, app_name in zip(ranks, store_app_ids, app_names):
-        AppAnnieRankings.objects.create(store_app_id=store_app_id,
-                                        app_name=app_name[:150],
-                                        rank_type=rank_type,
-                                        category=category[:150],
-                                        rank=rank,
-                                        date=date)
+            store_app_ids.append(0)
 
+    for seller_name in html.xpath("//tr/td[2]//*[contains(@class, 'publisher-name')]/span"):
+        try:
+            seller_names.append(seller_name.text[:150])
+        except:
+            seller_names.append(0)
+    for seller in html.xpath("//tr/td[2]//*[contains(@class, 'publisher-name')]"):
+        seller_id = seller.attrib['href']
+        try:
+            seller_id = re.search('company/(.+)/', seller_id).group(1)
+            seller_ids.append(seller_id)
+        except:
+            seller_ids.append(0)
+
+    for rank, store_app_id, app_name in zip(ranks, store_app_ids, app_names):
+        ranking_obj.append(
+                            AppAnnieRankings(store_app_id=store_app_id,
+                            app_name=app_name[:150],
+                            rank_type=rank_type,
+                            category=category[:150],
+                            rank=rank,
+                            date=date)
+                           )
     rank_type='paid'
     app_names=[]
+    seller_names = []
+    seller_ids = []
     store_app_ids=[]
-    ranks = range(1, len(html.xpath('//table/tbody/tr/td[2]/div/div/span[1]/span/a'))+1 )
-    for app_name in html.xpath('//table/tbody/tr/td[2]/div/div/span[1]/span/a'):
+    ranks = range(1, len(html.xpath("//tr/td[3]//*[contains(@class, 'app-name')]/span"))+1 )
+    for app_name in html.xpath("//tr/td[3]//*[contains(@class, 'app-name')]/span"):
         try:
             app_names.append(app_name.text[:150])
         except:
-            app_names.append('NA')
-    for store_app_id in html.xpath('//table/tbody/tr/td[2]/div/div/span[3]'):
+            app_names.append(0)
+    for img in html.xpath('//tr/td[3]/div/div/a/img'):
+        store_app_id = img.attrib['src']
         try:
-            store_app_ids.append(store_app_id.text)
+            store_app_id = re.search('ios/(.+)/', store_app_id).group(1)
+            store_app_ids.append(store_app_id)
         except:
-            store_app_ids.append('NA')
+            store_app_ids.append(0)
+
+    for seller_name in html.xpath("//tr/td[3]//*[contains(@class, 'publisher-name')]/span"):
+        try:
+            seller_names.append(seller_name.text[:150])
+        except:
+            seller_names.append(0)
+    for seller in html.xpath("//tr/td[3]//*[contains(@class, 'publisher-name')]"):
+        seller_id = seller.attrib['href']
+        try:
+            seller_id = re.search('company/(.+)/', seller_id).group(1)
+            seller_ids.append(seller_id)
+        except:
+            seller_ids.append(0)
+
     for rank, store_app_id, app_name in zip(ranks, store_app_ids, app_names):
-        AppAnnieRankings.objects.create(store_app_id=store_app_id,
-                                        app_name=app_name[:150],
-                                        rank_type=rank_type,
-                                        category=category[:150],
-                                        rank=rank,
-                                        date=date)
+        ranking_obj.append(
+                            AppAnnieRankings(store_app_id=store_app_id,
+                            app_name=app_name[:150],
+                            rank_type=rank_type,
+                            category=category[:150],
+                            rank=rank,
+                            date=date)
+                           )
 
     rank_type='grossing'
     app_names=[]
+    seller_names = []
+    seller_ids = []
     store_app_ids=[]
-    ranks = range(1, len(html.xpath('//table/tbody/tr/td[3]/div/div/span[1]/span/a'))+1 )
-    for app_name in html.xpath('//table/tbody/tr/td[3]/div/div/span[1]/span/a'):
+    ranks = range(1, len(html.xpath("//tr/td[4]//*[contains(@class, 'app-name')]/span"))+1 )
+    for app_name in html.xpath("//tr/td[4]//*[contains(@class, 'app-name')]/span"):
         try:
             app_names.append(app_name.text[:150])
         except:
-            app_names.append('NA')
-    for store_app_id in html.xpath('//table/tbody/tr/td[3]/div/div/span[3]'):
+            app_names.append(0)
+    for img in html.xpath('//tr/td[4]/div/div/a/img'):
+        store_app_id = img.attrib['src']
         try:
-            store_app_ids.append(store_app_id.text)
+            store_app_id = re.search('ios/(.+)/', store_app_id).group(1)
+            store_app_ids.append(store_app_id)
         except:
-            store_app_ids.append('NA')
+            store_app_ids.append(0)
+    for seller_name in html.xpath("//tr/td[4]//*[contains(@class, 'publisher-name')]/span"):
+        try:
+            seller_names.append(seller_name.text[:150])
+        except:
+            seller_names.append(0)
+    for seller in html.xpath("//tr/td[4]//*[contains(@class, 'publisher-name')]"):
+        seller_id = seller.attrib['href']
+        try:
+            seller_id = re.search('company/(.+)/', seller_id).group(1)
+            seller_ids.append(seller_id)
+        except:
+            seller_ids.append(0)
+
     for rank, store_app_id, app_name in zip(ranks, store_app_ids, app_names):
-        AppAnnieRankings.objects.create(store_app_id=store_app_id,
-                                        app_name=app_name[:150],
-                                        rank_type=rank_type,
-                                        category=category[:150],
-                                        rank=rank,
-                                        date=date)
-
-    # soup = BeautifulSoup(html_source, 'html.parser')
-    # count=0
-    # for app in soup.findAll("td", {"class": "app"}):
-    #     count += 1
-    #     if count%3 == 1: #Free
-    #         app_name = app.find('a').text
-    #         store_app_id = app.find("span", {"style": "display:none"}).text
-    #         rank_type = 'free'
-    #     if count%3 == 2: #Paid
-    #         app_name = app.find('a').text
-    #         store_app_id = app.find("span", {"style": "display:none"}).text
-    #         rank_type = 'paid'
-    #     if count%3 == 0: #Grossing
-    #         app_name = app.find('a').text
-    #         store_app_id = app.find("span", {"style": "display:none"}).text
-    #         rank_type = 'grossing'
-    #     rank = ((count-0.1)//3)+1
-
-
+        ranking_obj.append(
+                            AppAnnieRankings(store_app_id=store_app_id,
+                            app_name=app_name[:150],
+                            rank_type=rank_type,
+                            category=category[:150],
+                            rank=rank,
+                            date=date)
+                           )
+    AppAnnieRankings.objects.bulk_create(ranking_obj, batch_size=10000)
 
 
 from selenium import webdriver
 from time import sleep
 
-print 'Launching Chromium..'
+print('Launching Chromium..')
 # browser = webdriver.Firefox()
 browser = webdriver.Chrome('./chromedriver')
-print 'Entering AppAnnie'
+print('Entering AppAnnie')
 browser.get('https://www.appannie.com/account/login/')
 
 username = browser.find_element_by_id("email")
@@ -135,29 +176,29 @@ dates = ['2013-11-01', '2013-12-01', '2014-01-01', '2014-02-01', '2014-03-01', '
          '2015-11-01', '2015-12-01', '2016-01-01']
 
 dates = []
-date = datetime.date(2014, 01, 01)
-while date != datetime.date(2014, 07, 01):
+date = datetime.date(2014, 1, 1)
+while date != datetime.date(2014, 7, 1):
     dates.append(date)
     date += relativedelta(days=1)
 
 for category in categories:
     for date in dates:
-        url = 'https://www.appannie.com/apps/ios/top-chart/united-states/'+category+'/?device=iphone&date='+date
+        url = 'https://www.appannie.com/apps/ios/top-chart/united-states/'+category+'/?page_size=500&device=iphone&date='+date.strftime("%Y-%m-%d")
         browser.get(url)
-        try:
-            browser.find_element_by_class_name("load-all").click()
-        except:
-            try:
-                re.search('''There is no ranking data available on this date, for the selected country and category.''', browser.page_source).group()
-                continue
-            except:
-                raw_input("Press Enter to continue...")
-                # url = 'https://www.appannie.com/apps/ios/top-chart/united-states/'+category+'/?device=iphone&date='+date
-                browser.get(url)
-                browser.find_element_by_class_name("load-all").click()
+        # try:
+        #     browser.find_element_by_class_name("load-all").click()
+        # except:
+        #     try:
+        #         re.search('''There is no ranking data available on this date, for the selected country and category.''', browser.page_source).group()
+        #         continue
+        #     except:
+        #         input("Press Enter to continue...")
+        #         # url = 'https://www.appannie.com/apps/ios/top-chart/united-states/'+category+'/?device=iphone&date='+date
+        #         browser.get(url)
+        #         browser.find_element_by_class_name("load-all").click()
         sleep(3)
         html_source = browser.page_source
-        date = datetime.datetime.strptime(date, '%Y-%m-%d')
+        # date = datetime.datetime.strptime(date, '%Y-%m-%d')
         get_ranking(html_source=html_source, date=date, category=category)
 
 browser.close()
