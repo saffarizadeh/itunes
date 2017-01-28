@@ -55,6 +55,7 @@ class ReleaseNote(models.Model):
 
 class AppAnnieReleaseNote(models.Model):
     app = models.ForeignKey(App)
+    store_app_id = models.IntegerField()
     version = models.CharField(max_length=200)
     date = models.DateTimeField()
     note = models.TextField(blank=True, null=True)
@@ -178,6 +179,9 @@ class AppAnnieRankings(models.Model):
     app_name = models.CharField(max_length=200)
     rank_type = models.CharField(max_length=20)
     category = models.CharField(max_length=200)
+    seller_name = models.CharField(max_length=200)
+    seller_id = models.BigIntegerField(default=0)
+    app_url = models.URLField(blank=True, null=True)
     rank = models.IntegerField(blank=True, null=True)
     date = models.DateTimeField()
 

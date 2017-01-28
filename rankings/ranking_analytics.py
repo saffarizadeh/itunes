@@ -3,8 +3,8 @@ from __future__ import print_function
 __author__ = 'Kambiz'
 
 import sys
-sys.path.insert(0, '/home/kaminem64/itunes')
-sys.path.insert(0, '/home/kaminem64/itunes/app')
+sys.path.insert(0, '/home/kambiz/itunes')
+sys.path.insert(0, '/home/kambiz/itunes/app')
 import os
 os.environ['DJANGO_SETTINGS_MODULE'] = 'itunes.settings'
 import django

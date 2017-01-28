@@ -1,5 +1,5 @@
 __author__ = 'Kambiz'
-import urllib2
+import urllib
 import xml.etree.ElementTree as ET
 from lxml import etree
 import re
@@ -31,8 +31,8 @@ class ReviewCrawler(object):
     def get_total_pages(self):
         page_number = 0
         url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=%s&pageNumber=%d&sortOrdering=4&onlyLatestVersion=false&type=Purple+Software" % (self.app_id, page_number)
-        # req = urllib2.Request(url, headers={"X-Apple-Store-Front": self.front,"User-Agent": self.user_agent})
-        # u = urllib2.urlopen(req, timeout=5)
+        # req = urllib.request.Request(url, headers={"X-Apple-Store-Front": self.front,"User-Agent": self.user_agent})
+        # u = urllib.request.urlopen(req, timeout=5)
         # page = u.read()
         headers = {"X-Apple-Store-Front": self.front,"User-Agent": self.user_agent}
         u = requests.get(url, timeout=5, verify=False, headers=headers)
@@ -52,8 +52,8 @@ class ReviewCrawler(object):
     def download_reviews(self):
         for page_number in range(self.start_page,self.finish_page):
             url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=%s&pageNumber=%d&sortOrdering=4&onlyLatestVersion=false&type=Purple+Software" % (self.app_id, page_number)
-            # req = urllib2.Request(url, headers={"X-Apple-Store-Front": self.front,"User-Agent": self.user_agent})
-            # u = urllib2.urlopen(req, timeout=5)
+            # req = urllib.request.Request(url, headers={"X-Apple-Store-Front": self.front,"User-Agent": self.user_agent})
+            # u = urllib.request.urlopen(req, timeout=5)
             # page = u.read()
             headers = {"X-Apple-Store-Front": self.front, "User-Agent": self.user_agent}
             u = requests.get(url, timeout=5, verify=False, headers=headers)

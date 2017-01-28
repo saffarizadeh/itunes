@@ -26,10 +26,10 @@ def get_releasenote(html_source):
             version = re.search(r'Version (.+?) \(', version_date.text).group(1)
             try:
                 note = version_date.getnext()
-                note = re.sub("[\r\n]+", ".", etree.tostring(note, pretty_print=True))
-                note = re.sub("<br />", ".", note)
-                note = re.sub("<br/>", ".", note)
-                note = '. '.join(re.findall(r'<p>(.+?)</p>', note))
+                note = re.sub(b"[\r\n]+", b".", etree.tostring(note, pretty_print=True))
+                note = re.sub(b"<br />", b".", note)
+                note = re.sub(b"<br/>", b".", note)
+                note = b'. '.join(re.findall(b'<p>(.+?)</p>', note))
             except:
                 note = ''
             releasenotes.append({'date': date, 'version': version, 'note': note})
@@ -43,6 +43,7 @@ def get_releasenote(html_source):
 def create_releasenotes(app, releasenotes):
     for releasenote in releasenotes:
         AppAnnieReleaseNote.objects.create(app=app,
+                                           store_app_id=app.store_app_id,
                                            date=releasenote['date'],
                                            version=releasenote['version'],
                                            note=releasenote['note'])
@@ -64,7 +65,9 @@ username.send_keys("kaminem64@yahoo.com")
 password.send_keys("linux116")
 browser.find_element_by_id("submit").click()
 
-apps = App.objects.filter(is_reviews_crawled=True, is_releasenotes_crawled=False).order_by('id')
+sleep(5)
+
+apps = App.objects.filter(is_releasenotes_crawled=True).order_by('id')
 
 for app in apps:
     app_id = app.store_app_id
@@ -72,22 +75,22 @@ for app in apps:
     save = True
     url = 'https://www.appannie.com/apps/ios/app/'+str(app_id)+'/details/'
     browser.get(url)
+    html_source = browser.page_source
     try:
-        re.search('''The data was collected from the App Store on''', browser.page_source).group()
+        re.search('''The data was collected from the App Store on''', html_source).group()
     except:
         try:
-            re.search('''This application has been removed from the store''', browser.page_source).group()
+            re.search('''This application has been removed from the store''', html_source).group()
             print('This application has been removed from the store!!!')
             save = False
         except:
             try:
-                re.search('''This asset has been temporarily disabled due to a copyright issue''', browser.page_source).group()
+                re.search('''This asset has been temporarily disabled due to a copyright issue''', html_source).group()
                 print('This asset has been temporarily disabled due to a copyright issue!!!')
                 save = False
             except:
                 input("Press Enter to continue...")
                 browser.get(url)
-    html_source = browser.page_source
     releasenotes = get_releasenote(html_source=html_source)
     create_releasenotes(app=app, releasenotes=releasenotes)
     if save:

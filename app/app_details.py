@@ -11,7 +11,8 @@ django.setup()
 
 from app.models import *
 
-import urllib2
+import urllib
+import requests
 import re
 import json
 import datetime
@@ -30,14 +31,19 @@ class AppCrawler(object):
     def get_total_pages(self):
         page_number = 0
         url = "https://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=%s&pageNumber=%d&sortOrdering=4&onlyLatestVersion=false&type=Purple+Software" % (self.app_id, page_number)
-        req = urllib2.Request(url, headers={"X-Apple-Store-Front": self.front,"User-Agent": self.user_agent})
-        u = urllib2.urlopen(req)
-        page = u.read()
+        # req = urllib.request.Request(url, headers={"X-Apple-Store-Front": self.front,"User-Agent": self.user_agent})
+        # u = urllib.request.urlopen(req)
+        # page = u.read()
+        headers = {"X-Apple-Store-Front": self.front,"User-Agent": self.user_agent}
+        u = requests.get(url, verify=False, headers=headers)
+        u.raise_for_status()
+        page = u.content
+
         parser = etree.XMLParser(recover=True)
         root = etree.fromstring(page, parser=parser)
         for node in root.findall('{http://www.apple.com/itms/}View/{http://www.apple.com/itms/}ScrollView/{http://www.apple.com/itms/}VBoxView/{http://www.apple.com/itms/}View/{http://www.apple.com/itms/}MatrixView/{http://www.apple.com/itms/}VBoxView/{http://www.apple.com/itms/}VBoxView/{http://www.apple.com/itms/}HBoxView/{http://www.apple.com/itms/}TextView/{http://www.apple.com/itms/}SetFontStyle/{http://www.apple.com/itms/}b'):
             try:
-                self.total_pages = re.search('Page 1 of (\d+)', node.text).group(1)
+                self.total_pages = re.search(b'Page 1 of (\d+)', node.text).group(1)
             except:
                 self.total_pages = 1
         return int(self.total_pages)
@@ -86,7 +92,7 @@ class AppCrawler(object):
 
     def extract_release_notes(self, page):
         # print page
-        text = re.search('"versionHistory":(.+)', page).group(1).replace('null','""').replace('true','""')
+        text = re.search(b'"versionHistory":(.+)', page).group(1).replace('null','""').replace('true','""')
         # print "\n\n\n\n\n\n\n\n\n\n"
         # print text
         # text = text[text.find('[{'): text.find('}]')+2]
@@ -162,20 +168,27 @@ class AppCrawler(object):
     def itunes_api_lookup(self):
         result = False
         url = 'https://itunes.apple.com/lookup?id=%d'%(self.app_id)
-        req = urllib2.Request(url, headers={"User-Agent": self.user_agent})
-        u = urllib2.urlopen(req, timeout=30)
-        page = json.load(u)
+        # req = urllib.request.Request(url, headers={"User-Agent": self.user_agent})
+        # u = urllib.request.urlopen(req, timeout=30)
+        headers = {"X-Apple-Store-Front": self.front,"User-Agent": self.user_agent}
+        u = requests.get(url, verify=False, headers=headers)
+        u.raise_for_status()
+        page = u.json()
         try:
             result = page['results'][0]
         except:
-            print 'No result for: %d' %(self.app_id)
+            print('No result for: %d' %(self.app_id))
         return result
 
     def itunes_app_details_crawl(self):
         app_url = "https://itunes.apple.com/%s/app/id%d?mt=8" %(self.app_store, self.app_id)
-        req = urllib2.Request(app_url, headers={"User-Agent": self.user_agent})
-        u = urllib2.urlopen(req, timeout=30)
-        page = u.read()
+        # req = urllib.request.Request(app_url, headers={"User-Agent": self.user_agent})
+        # u = urllib.request.urlopen(req, timeout=30)
+        # page = u.read()
+        headers = {"X-Apple-Store-Front": self.front,"User-Agent": self.user_agent}
+        u = requests.get(app_url, verify=False, headers=headers)
+        u.raise_for_status()
+        page = u.content
         return page
 
     def create_release_notes(self, release_notes):
@@ -192,7 +205,7 @@ class AppCrawler(object):
                                            note=release_note['note'])
         return 0
 
-    def get_app(self):
+    def get_app(self, get_num_of_reviews=False):
         # App
         json_result = self.itunes_api_lookup()
         if not json_result:
@@ -206,9 +219,13 @@ class AppCrawler(object):
         seller = self.create_seller(seller_id=app_detail['seller_id'],
                                     seller_name=app_detail['seller_name'],
                                     seller_url=app_detail['seller_url'])
+        if get_num_of_reviews:
+            total_pages = self.get_total_pages()
+            total_reviews = total_pages * 25
+        else:
+            total_pages = 0
+            total_reviews = 0
 
-        total_pages = self.get_total_pages()
-        total_reviews = total_pages * 25
         self.create_app(app_id=app_detail['app_id'],
                         app_name=app_detail['app_name'][:200],
                         app_url=app_detail['app_url'],
@@ -228,8 +245,9 @@ class AppCrawler(object):
 
         # Release Notes
         app_details_page = self.itunes_app_details_crawl()
-        release_notes = self.extract_release_notes(page=app_details_page)
-        self.create_release_notes(release_notes=release_notes)
+        # release_notes = self.extract_release_notes(page=app_details_page)
+        # self.create_release_notes(release_notes=release_notes)
+        """release notes part of this code is outdated and should be updated if we want to use it"""
         return True
 
 
