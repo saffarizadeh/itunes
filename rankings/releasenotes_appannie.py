@@ -61,13 +61,13 @@ browser.get('https://www.appannie.com/account/login/')
 
 username = browser.find_element_by_id("email")
 password = browser.find_element_by_id("password")
-username.send_keys("kaminem64@yahoo.com")
+username.send_keys("kaminem@gmail.com")
 password.send_keys("linux116")
 browser.find_element_by_id("submit").click()
 
 sleep(5)
 
-apps = App.objects.filter(is_releasenotes_crawled=True).order_by('id')
+apps = App.objects.filter(is_releasenotes_crawled=False).order_by('id')
 
 for app in apps:
     app_id = app.store_app_id
