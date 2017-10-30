@@ -1,0 +1,15 @@
+numpy
+scipy
+matplotlib
+pandas
+django>=1.9.7
+psycopg2
+pymongo
+lxml
+nltk
+gensim
+scikit-learn[alldeps]
+XlsxWriter
+cloud
+textblob
+
