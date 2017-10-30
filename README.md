@@ -5,6 +5,13 @@ In this research project we extract mobile applications' information and their u
 
 Requirements
 -----------------------
+To install all the python packages inside a virtualenv or as root (sudo):
+pip install -r requirements.txt
+
+To complete installation for NLTK and Stanford Parser see below.
+If you prefer a step-by-step installation see below.
+
+-----------------------
 General
 -----------------------
 sudo apt-get install python-pip python-dev
